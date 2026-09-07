@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------
+# Audio recordings. ~4.6 GB of WAV in this folder; individual takes
+# run 30-100 MB, over GitHub's 100 MB per-file limit. The recordings
+# are the raw data, not the project -- they live outside git.
+# ---------------------------------------------------------------
+*.wav
+*.WAV
+*.wv
+*.aup
+*_Audacity_Project/
+oldzyliazm1/
+zoomh3vr/
+Old Audio Recordings (vaulted)/
+old code (vaulted)/
+
+# Stale duplicate of the source tree (older copies of the same .m files)
+專題/
+
+# Superseded drafts of the distance report; the final one is
+# DOA_Distance_Report.pptx
+DOA_Distance_Solved.pptx
+DOA_Distance_Solved_v2.pptx
+DOA_Distance_Solved_BEFORE_slide15-17_rewrite.pptx
+
+# MATLAB
+*.asv
+*.mat
+*.fig
+*.slxc
+slprj/
+
+# macOS
+.DS_Store
