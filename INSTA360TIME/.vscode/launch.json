@@ -1,0 +1,68 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Live: mics + Insta360 X4",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/live_tracker.py",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Live: mics only (radar)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/live_tracker.py",
+            "args": ["--no-camera"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Live + record both mics",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/live_tracker.py",
+            "args": ["--record"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Calibrate mic yaw (source 1.5 m straight ahead)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/live_tracker.py",
+            "args": ["--calibrate", "1.5", "0"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Replay old take (in front of Zylia)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/live_tracker.py",
+            "args": ["--replay", "../2micdirectfrontzylia1.wav", "../2micdirectfrontzoom1.WAV",
+                     "--no-camera", "--truth-az", "-18.43"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "X4 camera test (drag to look around)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/camera_view.py",
+            "args": ["--test"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Validate against MATLAB results",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/validate_offline.py",
+            "args": ["--sh"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        }
+    ]
+}

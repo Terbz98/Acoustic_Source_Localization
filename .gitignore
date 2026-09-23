@@ -31,3 +31,10 @@ slprj/
 
 # macOS
 .DS_Store
+
+# Python (INSTA360TIME live tracker)
+.venv/
+__pycache__/
+INSTA360TIME/recordings/
+INSTA360TIME/logs/
+INSTA360TIME/x4_frame.jpg

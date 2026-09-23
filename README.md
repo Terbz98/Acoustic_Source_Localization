@@ -1,185 +1,234 @@
-# Acoustic Source Localization with Spherical Microphone Arrays
+<div align="center">
 
-Estimating **direction (azimuth + elevation) and distance** of a sound source in a
-real room, in MATLAB, from spherical microphone array recordings.
+# 🎯 Acoustic Source Localization
 
-Undergraduate research project — active, updated as work continues.
+**Find where a sound is coming from (direction *and* distance) with two spherical microphone arrays, and point a 360° camera at it in real time.**
 
-**Hardware:** Zylia ZM-1 (3rd-order ambisonics, 19 capsules) and Zoom H3-VR
-(1st-order AmbiX).
+![MATLAB](https://img.shields.io/badge/MATLAB-offline%20analysis-orange)
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
+![macOS](https://img.shields.io/badge/macOS-live%20tracker-lightgrey)
+![Status](https://img.shields.io/badge/status-active%20research-brightgreen)
+
+<!-- PLACEHOLDER: replace with a demo GIF of the live tracker + Insta360 X4 view (e.g. docs/demo.gif) -->
+<img src="docs/live_tracker_panel.png" width="360" alt="Live tracker: top-view radar and per-sound readout">
+
+<sub>The live tracker replaying a recorded take: a talker 1.58 m away, straight in front of the Zylia.<br>
+The two mics' direction maps (orange and blue) cross where the sound is. Every sound gets its own line.</sub>
+
+</div>
 
 ---
 
-## The short version
+## ✨ Highlights
 
-Direction works well from a single array. **Distance does not, and cannot** —
-that turned out to be the central result rather than a bug to fix.
+- 🧭 **Direction within a few degrees** (under 3° on most takes, 6.2° worst), with elevation from the 3rd-order Zylia array.
+- 📏 **Distance within 3–6% of a tape measure** by triangulating two arrays 1 m apart. A single array can't measure distance at all ([here's why](#-key-findings)).
+- 🎥 **Live mode:** a Zylia ZM-1 and a Zoom H3-VR stream into Python, and an Insta360 X4's 360° video turns to face whoever is talking or clapping.
+- 📝 **Every sound logged:** each clap or word gets az / el / distance on screen, in the terminal, and in a CSV file.
+- ✅ **Validated:** the Python port reproduces the MATLAB results on the same recordings.
 
-At 1.5 m, the only single-microphone cue for range is the curvature of the
-wavefront, which across an 11 cm sphere amounts to roughly **0.5 mm** of extra
-path. Nine successive methods were tried against it and all nine returned the
-edge of the search grid — 3.00 m on every take regardless of the true distance,
-and 10.0 m when the grid was widened to 10 m. The number was never a
-measurement.
+## 📑 Contents
 
-A quiet source nearby and a loud source far away produce nearly the same signal
-at one microphone, and nothing in that recording breaks the tie. Breaking it
-needs an external reference. Two were recordable here: **a second array at a
-measured baseline**, and **the floor as a reflector**. Both were tested. The
-second viewpoint works.
+- [Quick start: live tracker](#-quick-start-live-tracker)
+- [Hardware](#-hardware)
+- [How it works](#-how-it-works)
+- [Results](#-results)
+- [Repository layout](#-repository-layout)
+- [Offline analysis in MATLAB](#-offline-analysis-in-matlab)
+- [Recording protocol](#-recording-protocol)
+- [Key findings](#-key-findings)
+- [Limitations](#-limitations)
 
-With a 1 m baseline, distance lands within **3–6% of a tape measure**.
+## 🚀 Quick start: live tracker
 
-## Results
+> Full guide: [`INSTA360TIME/README.md`](INSTA360TIME/README.md)
 
-Seven takes, three physical rig arrangements, source at 1.50 m.
+**1. Set up once:**
 
-| take | rig | azimuth | distance | vs truth | verdict |
-|---|---|---|---|---|---|
-| 11 Aug, front clap | side by side | −5.0° | 2.78 m | +85% | passed, wrong |
-| 11 Aug, back clap | side by side | +0.7° | 1.56 m | +4% | trusted |
-| 17 Aug, in front of Zylia | side by side | −0.7° | 1.52 m | −4% | trusted |
-| 17 Aug, in front of Zoom | side by side | −2.7° | 1.62 m | +3% | trusted |
-| 17 Aug, centre, elevated | side by side | −0.7° | 1.66 m | +6% | trusted |
-| 17 Aug, left | front-back | +6.2° | 3.14 m | +109% | rejected |
-| 17 Aug, right | front-back | +2.4° | 2.40 m | +60% | passed, wrong |
+```bash
+cd INSTA360TIME
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+```
 
-- **Azimuth is inside 6.2° on every take**, on all three rig arrangements,
-  including the ones where distance failed.
-- **Elevation works on the Zylia and not on the Zoom.** The elevated take reads
-  +15.6° against roughly +16° measured three independent ways. At 1st order the
-  vertical beam is too broad to beat the reverberant field, so the Zoom's
-  vertical map peaks at exactly 0.0° on every take — it is measuring the room,
-  not the source. This is an estimator limit, not broken hardware.
-- **Distance splits on exactly one thing:** whether the relative yaw between the
-  two arrays had been measured. Where it was known: −4, +3, +6, +4%. Where it
-  was not: +60, +85, +109%. Same method, same geometry, one missing number.
+**2. Connect the hardware:**
 
-## Method
-
-**Direction.** Frequency-domain steered-response power over spherical-harmonic
-steering vectors, on a rigid-sphere near-field model (spherical Hankel
-functions). 1024-sample frames, 50% overlap at 48 kHz, 60 bins across the
-analysis band, energy and SNR gating, clipped-frame rejection, parabolic peak
-interpolation on the az/el grid.
-
-**Frequency-dependent order.** A spherical array only carries usable order-*n*
-information above its cut-on `f_n = n·c/(2πa)`. Below it, that order's channels
-are self-noise and folding them into the SRP wrecks the estimate. Each frequency
-bin now uses only the orders it can physically support. The original
-800–4000 Hz band sat below the order-2 (~2.2 kHz) and order-3 (~3.3 kHz) cut-ons,
-which left 11 of 16 channels as pure noise — this was the bug behind the early
-3rd-order runs.
-
-**Capsule radius.** Calibrated from the recordings rather than the datasheet.
-GCC-PHAT arrival delays across all 19 capsules match the rigid-sphere model at
-**r = 0.056 m with 0.99 correlation**; the 0.049 m value in the SPARTA/SAF preset
-predicts delays 13–15% short. Correcting it improved azimuth RMSE on every take
-(26.8→26.1, 31.9→23.4, 13.3→10.8°).
-
-**Distance.** Not by crossing two peak bearings — two peaks each a few degrees
-off put the answer metres away. Each array contributes its whole accumulated
-power map, and the two are **multiplied across a grid of candidate source
-positions**. A noisy frame widens the ridge instead of moving the answer. Each
-frame's map is contrast-normalised so a loud syllable does not outvote a quiet
-one, then weighted by how decisive that frame actually was.
-
-**Where it stops working.** The angle the two arrays disagree by *is* the
-distance information; there is nothing else. On a 1 m baseline that is 36.9° at
-1.5 m, 18.9° at 3 m, 11.4° at 5 m. Hence `σ(r)/r ≈ (r/B)·σ(θ)`, and past
-`r/B = 3` the two rays are too close to parallel for the answer to mean
-anything. Unlike curvature there is no ceiling — only a baseline that has to
-grow with the range.
-
-**The dominant error term.** An unmeasured relative rotation between the two
-arrays. A source truly at 1.50 m reports as 1.75 m through a 5° twist, 2.09 m
-through 10°, 2.59 m through 15°, 3.37 m through 20°. The whole measurement is
-only 36.9° wide, so 15° of unknown rotation throws away 40% of the signal.
-`check_mic_yaw.m` recovers it from a front take and a back take alone, with no
-ground truth.
-
-**The floor-reflection alternative is closed**, by measurement rather than
-assumption, and not for the expected reason. The floor is bare hardwood and
-returns ~96% of the pressure — absorption was never the problem. The *ceiling*
-echo lands 0.25 ms from the floor echo — 12 samples at 48 kHz, against a clap
-roughly 3 ms long — and the two comb-filter into a blend with no fixed
-direction. It is a microphone-height problem: the collision happens when the mic
-sits at (ceiling − source height), which is about where a normal stand puts it.
-Dropping the mic to 0.35 m separates the two arrivals by 4 ms.
-
-## Repository layout
-
-Analysis scripts, run one take at a time:
-
-| file | what it does |
+| Device | Setting |
 |---|---|
-| `main_2mic.m` | **Start here.** Azimuth, elevation and distance from one pair of recordings |
-| `main_doa_estimation.m` | Single-array version: direction, plus the curvature-based distance attempt |
-| `run_doa.m` | The validated SRP direction estimator |
-| `az_power_map.m` | Full accumulated azimuth power map for one array (what triangulation consumes) |
-| `triangulate.m` | Source position from two arrays, by multiplying their power maps |
-| `estimate_distance.m` | Curvature-based range from the raw 19-capsule file — kept as the negative result |
-| `floor_bounce_distance.m` | Range from the floor reflection — also a negative result |
-| `build_steering_matrix.m` | Spherical-harmonic steering vectors with frequency-dependent order |
-| `real_sh_matrix.m`, `sph_hankel2.m`, `convert_to_acn_n3d.m` | Spherical harmonics, Hankel functions, A-format → ACN/SN3D |
-| `align_two_mics.m` | Puts two independently-started recorders on one clock |
-| `check_mic_yaw.m` | Measures the relative rotation between arrays, no ground truth needed |
-| `check_recording.m` | Sanity-check any exported WAV before running the pipeline |
-| `synthetic_test.m` | End-to-end check against a synthesised source at a known position |
-| `test_all_takes.m` | Regression harness — reruns every take on record and prints one scoreboard |
-| `test_*.m` | Individual investigations, each named for the question it answers |
-| `triangulate_aug11.m` | Frozen 2026-08-11 copy, used only by `test_old_vs_new.m` |
+| Zylia ZM-1 | Plug in. On macOS, approve the driver: *System Settings → General → Login Items & Extensions → Driver Extensions → ZYLIA ZM-1 Driver* |
+| Zoom H3-VR | *Menu → USB → Audio I/F → 4ch Ambisonics*, then *Ambisonic Mode → AmbiX* |
+| Insta360 X4 | Plug in USB-C and choose **Webcam** on the camera's screen. Set *Auto Power Off → Never* |
 
-Reports (`.pptx`): `DOA_Project_Presentation` (method), `DOA_Distance_Report`
-(how distance was solved), `DOA_Limit_Tests` (five takes pushing it until it
-breaks).
+**3. Run** (double-click `START_TRACKER.command`, or):
 
-## Running it
+```bash
+.venv/bin/python live_tracker.py
+```
 
-MATLAB. Open `main_2mic.m`, edit section 1 to select a take — each take block
-carries its own ground truth, baseline, rig layout and yaw, because those belong
-to the recording session and not to the script — then Run. One take at a time.
+Clap or talk near the mics. The view turns toward you, and each sound gets its own line:
 
-The recordings are **not in this repository** (~4.6 GB of WAV, over GitHub's
-per-file limit). Scripts expect them in the working directory.
+```
+[22:30:52] SOUND #2   az  -20.3   el  +0.7   dist 1.44 m   (1.50 s)
+[22:30:54] SOUND #3   az  -18.1   el  +0.9   dist 1.45 m   (1.16 s)
+```
 
-## Recording protocol
+| Key | Action |
+|---|---|
+| `Q` | quit |
+| `R` | start / stop recording both mics to WAV |
+| `B` | look out of the other side of the X4 |
+| `U` | upside-down (X4 mounted upside down) |
+| `-` `=` | zoom out / in |
+| `C` | clear the maps |
 
-Every item exists because something went wrong without it.
+Rig measurements (baseline, mic yaw, camera position) go in [`INSTA360TIME/rig_config.py`](INSTA360TIME/rig_config.py).
 
-1. **Record a front take and a back take every setup.** `check_mic_yaw.m` gets
-   the twist from those two alone. One extra minute, and it is the difference
-   between 4% and 85%.
-2. **Tape the floor and label which array is FRONT.** The two front-back
-   arrangements give completely different distances and cannot be told apart
-   from the audio afterwards.
-3. **Never rebuild the rig mid-session without re-measuring.** The twist does not
-   survive a teardown and nothing downstream can detect that it changed.
-4. **Tape-measure the baseline.** Distance scales linearly with it and it cannot
-   be recovered from the audio.
-5. **Keep the source broadside, `r/B` under 3.** Grow the baseline with the
-   distance you want to measure.
-6. **Watch the H3-VR's input level** — it clipped on every clap in both sessions
-   — and write down the mic, source and ceiling heights.
+## 🎛 Hardware
 
-## Known limitations and open questions
+| | Array | Channels | Used for |
+|---|---|---|---|
+| **Zylia ZM-1** | 3rd-order spherical, 19 capsules on a 5.6 cm rigid sphere | 19 raw (live) / 16 ACN-SN3D (converted) | azimuth, elevation, one ray of the triangulation |
+| **Zoom H3-VR** | 1st-order ambisonic | 4 AmbiX | azimuth, the second ray of the triangulation |
+| **Insta360 X4** | 360° camera, USB webcam mode | 2880 × 1440 panorama @ 30 fps | the view that follows the sound |
 
-- An unmeasured rotation between the arrays is **invisible to every guard**. It
-  produces two perfectly self-consistent bearings that cross in the wrong place,
-  and nothing in the audio contradicts them. "Trusted" means the geometry is
-  self-consistent; it has never meant correct.
-- The 11 Aug front clap take reads +85% and passes every check. Unresolved:
-  two stories fit the recordings exactly and the audio cannot separate them.
-- Elevation ground truth is inferred from audio, never checked against a ruler.
-- Two arrays have one blind axis — the line through both of them, where a source
-  gives both the identical bearing at every range. You choose where to point it.
-  Covering front and side at once needs a third array off the line.
-- Next: one session with a tape-measured baseline at three or four known
-  distances, front/back pair at each. That turns correct answers into a
-  calibration curve.
+The two mics stand side by side, **1 m apart, both facing the same way**. The camera can go anywhere; you enter its position in the config.
 
-## In progress
+## 🔬 How it works
 
-Real-time operation: mapping per-frame direction estimates onto pan and tilt for
-a mounted Insta360 camera, so capture follows the active sound source. Not yet
-implemented.
+```mermaid
+flowchart LR
+    Z["Zylia ZM-1<br/>19 capsules"] --> SZ["SRP map<br/>rigid-sphere model"]
+    H["Zoom H3-VR<br/>4-ch AmbiX"] --> SH["SRP map<br/>1st-order harmonics"]
+    SZ --> F["Map fusion<br/>(triangulation)"]
+    SH --> F
+    F --> O(("az · el · distance"))
+    O --> V["Reframe the X4's<br/>360° video"]
+    O --> L["Per-sound log<br/>(screen + CSV)"]
+```
+
+1. **Direction, per mic.** Every ~10 ms frame, a *steered-response power* (SRP) map is computed over all directions: how much sound arrives from each one. The Zylia uses the exact rigid-sphere model of its 19 capsules, and the Zoom uses 1st-order spherical harmonics. Quiet, clipped and reverberant frames are gated out or down-weighted.
+2. **Distance, from two viewpoints.** Each mic's whole azimuth map, not just its peak, is laid over a grid of candidate positions in the room, and the two are multiplied. The peak of the product is the source. A slightly-off frame widens the ridge instead of moving the answer.
+3. **Camera.** The X4 can't turn, and doesn't need to: it already sees 360°. The program cuts a normal perspective view out of the panorama, centred on the sound, like Insta360's "reframe" but live.
+
+## 📊 Results
+
+Recorded takes with a tape-measured truth, source ≈ 1.5 m away. "Live" means the recording was replayed through the real-time Python tracker; the value is the median of its ~10 Hz updates.
+
+| Take | Truth (az, dist) | MATLAB az error | MATLAB dist | Live az error | Live dist |
+|---|---|---|---|---|---|
+| back clap | 180°, 1.50 m | +0.7° | **1.56 m** (+4%) | +0.9° | **1.58 m** |
+| in front of Zylia | −18.4°, 1.58 m | −0.7° | **1.52 m** (−4%) | +0.9° | **1.52 m** |
+| in front of Zoom | +18.4°, 1.58 m | −2.7° | **1.62 m** (+3%) | −2.8° | **1.66 m** |
+| centre, raised ~17° | 0°, 1.57 m | −0.7° | **1.66 m** (+6%) | −0.9° | **1.76 m** |
+
+- **Azimuth is inside 6.2° on every take**, including the ones where distance failed.
+- **Elevation** reads +15.6° against about +16–17° measured three independent ways (Zylia only; see limitations).
+- Takes with an **unmeasured rig rotation** give +60 to +109% distance error with the same method. That's why the recording protocol below exists.
+
+## 📁 Repository layout
+
+```
+.
+├── INSTA360TIME/            ← LIVE TRACKER (Python)
+│   ├── START_TRACKER.command    double-click to run
+│   ├── live_tracker.py          main program: audio, tracking, window, logging
+│   ├── rig_config.py            everything you measure at the rig
+│   ├── doa_core.py              per-mic SRP direction maps
+│   ├── fusion.py                two maps → position (triangulation)
+│   ├── camera_view.py           Insta360 X4 capture + 360° reframing
+│   ├── validate_offline.py      checks the Python against the MATLAB results
+│   └── matlab_original/         the MATLAB files it was ported from
+│
+├── main_2mic.m              ← OFFLINE ANALYSIS (MATLAB): start here
+├── run_doa.m                   validated SRP direction estimator
+├── az_power_map.m              accumulated azimuth map for one array
+├── triangulate.m               position from two arrays
+├── build_steering_matrix.m     spherical-harmonic steering, frequency-dependent order
+├── check_mic_yaw.m             relative rotation between the arrays
+├── align_two_mics.m            puts two recorders on one clock
+├── test_all_takes.m            regression scoreboard over every take
+├── test_*.m                    individual investigations
+└── *.pptx                      project reports
+```
+
+## 🧮 Offline analysis in MATLAB
+
+Open `main_2mic.m`, pick a take in section 1 (each take carries its own truth, baseline, layout and yaw), and press Run. It prints az / el / distance and draws three figures: per-frame estimates, polar SRP maps, and the fused position map.
+
+| Script | Use it for |
+|---|---|
+| `main_2mic.m` | two arrays → azimuth, elevation, **distance** |
+| `main_doa_estimation.m` | one array → direction only |
+| `test_all_takes.m` | after changing code: re-runs every take into one table |
+| `check_recording.m` | sanity-check an exported WAV |
+| `synthetic_test.m` | end-to-end check on a synthetic source |
+
+Recordings (~4.6 GB of WAV) aren't in the repo. The scripts expect them in the repo root. Zylia files must be converted with ZYLIA Ambisonics Converter to `_(ACN-SN3D-3).wav`.
+
+Reports: `DOA_Project_Presentation.pptx` (method), `DOA_Distance_Report.pptx` (how distance was solved), `DOA_Limit_Tests.pptx` (pushing it until it breaks).
+
+## 📋 Recording protocol
+
+Every rule exists because something went wrong without it.
+
+1. **Tape-measure the baseline.** Distance scales linearly with it.
+2. **Aim both mics the same way, and measure the leftover rotation** (`live_tracker.py --calibrate 1.5 0`, or `check_mic_yaw.m` on a front + back take). It's the dominant error term.
+3. **Never rebuild the rig mid-session without re-measuring.** The rotation doesn't survive a teardown.
+4. **Keep the source in front of the pair**, with range under about 3× the baseline. Grow the baseline for longer range.
+5. **Watch the H3-VR's input gain.** It clipped on every clap.
+6. **Mark which mic is where** on the floor. Swapped layouts can't be told apart afterwards.
+
+## 💡 Key findings
+
+<details>
+<summary><b>One array cannot measure distance.</b> Nine methods tried, nine failures.</summary>
+
+<br>
+
+At 1.5 m, the only single-array cue for range is the curvature of the wavefront. Across an 11 cm sphere that's about **0.5 mm** of extra path. Every curvature-based method returned the edge of its search grid: 3.00 m on every take, and 10.0 m when the grid was widened to 10 m. A quiet source nearby and a loud one far away produce nearly the same signal at one microphone. Breaking that tie needs an external reference, and **a second array at a known baseline** is the one that works.
+</details>
+
+<details>
+<summary><b>The relative rotation between the arrays is the dominant error.</b></summary>
+
+<br>
+
+The distance information *is* the angle the two arrays disagree by: 36.9° at 1.5 m on a 1 m baseline. An unmeasured twist eats straight into it. A source at 1.50 m reads 1.75 m through a 5° twist, 2.09 m through 10°, and 2.59 m through 15°. Takes where the rotation was measured: −4, +3, +6, +4%. Where it wasn't: +60, +85, +109%. The Zoom also carries a standing offset of about +4.75° that no aiming removes.
+</details>
+
+<details>
+<summary><b>Frequency-dependent order fixed the 3rd-order direction estimates.</b></summary>
+
+<br>
+
+A spherical array only carries usable order-*n* information above `f_n = n·c/(2πa)`. The original 800–4000 Hz band sat below the order-2 and order-3 cut-ons, which left 11 of 16 channels as pure noise. Each frequency bin now uses only the orders it can physically support.
+</details>
+
+<details>
+<summary><b>The Zylia's effective radius is 5.6 cm, not 4.9 cm.</b></summary>
+
+<br>
+
+GCC-PHAT arrival delays across all 19 capsules match the rigid-sphere model at **r = 0.056 m with 0.99 correlation**. The 0.049 m in the SAF preset predicts delays 13–15% short. The correction improved azimuth RMSE on every take.
+</details>
+
+<details>
+<summary><b>The floor reflection can't replace the second array</b> (at normal mic heights).</summary>
+
+<br>
+
+The floor echo is strong (bare hardwood, ~96% pressure), but the **ceiling** echo arrives only 0.25 ms after it. The two blur together into a blend with no fixed direction. Dropping the mic to 0.35 m separates them by 4 ms.
+</details>
+
+## 🚧 Limitations
+
+- **Blind axis:** a source on the line through both mics gives both the same bearing at every range, so distance isn't available there. The tracker then falls back to direction only and says so.
+- **Range:** trustworthy up to about 3× the baseline (≈ 3 m with the mics 1 m apart).
+- **Elevation comes from the Zylia only.** The H3-VR's 1st-order vertical beam is too broad to beat the room.
+- **An unmeasured twist between the arrays is invisible** to every check. The results look self-consistent and are wrong. Measure it.
+- The live tracker is **macOS-only** for now (CoreAudio devices + AVFoundation camera capture).
+
+---
+
+<div align="center">
+<sub>Undergraduate research project · MATLAB + Python · spherical microphone arrays</sub>
+</div>
