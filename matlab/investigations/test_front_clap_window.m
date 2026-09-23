@@ -11,6 +11,7 @@ function test_front_clap_window
 % bearings toward the look axis is pulling them toward the room average, which
 % is what reverberant tails do. If that is the cause, a window on the direct
 % sound should restore the parallax.
+addpath(fullfile(fileparts(mfilename('fullpath')), '..')); setup_paths;   % code + recordings on the path
 
 fa = '2micclapzyliafront_(ACN-SN3D-3).wav';
 fb = '2micclapzoomfront.WAV';

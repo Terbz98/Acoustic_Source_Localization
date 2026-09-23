@@ -34,6 +34,7 @@ function test_all_takes()
 %
 % Written 2026-08-18. Voice pair added and the clap diagnosis corrected
 % 2026-08-20.
+setup_paths;   % code + recordings on the path
 
 T = local_takes();
 

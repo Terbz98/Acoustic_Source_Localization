@@ -1,4 +1,4 @@
-cd('D:\專題');
+addpath(fullfile(fileparts(mfilename('fullpath')), '..')); setup_paths;   % code + recordings on the path
 % DECISIVE TEST. The two clap takes each contain an impulse, so each gives a
 % direct-to-reverberant ratio. In one room, direct energy falls as 1/r^2 while
 % the reverberant field is roughly uniform, so

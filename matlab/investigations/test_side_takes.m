@@ -42,6 +42,7 @@ function test_side_takes
 % outright, arguing any mic error must be even or odd under the flip. That is
 % only true of a SINGLE angular harmonic; a real direction-dependent error has
 % both even and odd terms and can take any pair of values. Corrected.)
+addpath(fullfile(fileparts(mfilename('fullpath')), '..')); setup_paths;   % code + recordings on the path
 
 B = 1.00;
 STANDING = 4.75;          % the offset the five front takes agree on

@@ -6,7 +6,7 @@ steering a virtual camera cut out of the Insta360 X4's 360 video.
     distance  : the two maps fused over the room      (fusion.py    = triangulate.m)
     camera    : perspective view reframed at (az, el) (camera_view.py)
 
-Edit rig_config.py for your setup first. Then, from INSTA360TIME/:
+Edit rig_config.py for your setup first. Then, from INSTA360/:
 
     .venv/bin/python live_tracker.py --list-devices     # are both mics there?
     .venv/bin/python live_tracker.py --no-camera        # audio only: radar view

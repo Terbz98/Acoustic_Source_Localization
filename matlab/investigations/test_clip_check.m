@@ -8,6 +8,7 @@ function test_clip_check
 % the omni (W) part relative to the directional parts and flattens the beam.
 % run_doa reported "0 clipped dropped" for the Zylia on this take -- check
 % whether that is true of the RAW file or only of the rescaled converted one.
+addpath(fullfile(fileparts(mfilename('fullpath')), '..')); setup_paths;   % code + recordings on the path
 
 files = {
   '2micclapzyliafront.wav'               'FRONT clap  Zylia RAW'

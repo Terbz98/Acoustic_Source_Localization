@@ -34,6 +34,7 @@ The two mics' direction maps (orange and blue) cross where the sound is. Every s
 - [How it works](#-how-it-works)
 - [Results](#-results)
 - [Repository layout](#-repository-layout)
+- [Data](#-data)
 - [Offline analysis in MATLAB](#-offline-analysis-in-matlab)
 - [Recording protocol](#-recording-protocol)
 - [Key findings](#-key-findings)
@@ -41,13 +42,14 @@ The two mics' direction maps (orange and blue) cross where the sound is. Every s
 
 ## 🚀 Quick start: live tracker
 
-> Full guide: [`INSTA360TIME/README.md`](INSTA360TIME/README.md)
+> Full guide, settings and troubleshooting: [`INSTA360/README.md`](INSTA360/README.md)
 
 **1. Set up once:**
 
 ```bash
-cd INSTA360TIME
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+git clone https://github.com/Terbz98/Acoustic_Source_Localization.git
+cd Acoustic_Source_Localization/INSTA360
+python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt
 ```
 
 **2. Connect the hardware:**
@@ -80,7 +82,7 @@ Clap or talk near the mics. The view turns toward you, and each sound gets its o
 | `-` `=` | zoom out / in |
 | `C` | clear the maps |
 
-Rig measurements (baseline, mic yaw, camera position) go in [`INSTA360TIME/rig_config.py`](INSTA360TIME/rig_config.py).
+Rig measurements (baseline, mic yaw, camera position) go in [`INSTA360/rig_config.py`](INSTA360/rig_config.py).
 
 ## 🎛 Hardware
 
@@ -127,44 +129,48 @@ Recorded takes with a tape-measured truth, source ≈ 1.5 m away. "Live" means t
 ## 📁 Repository layout
 
 ```
-.
-├── INSTA360TIME/            ← LIVE TRACKER (Python)
+Acoustic_Source_Localization/
+├── INSTA360/          🎥 live tracker (Python)          → INSTA360/README.md
 │   ├── START_TRACKER.command    double-click to run
-│   ├── live_tracker.py          main program: audio, tracking, window, logging
-│   ├── rig_config.py            everything you measure at the rig
-│   ├── doa_core.py              per-mic SRP direction maps
-│   ├── fusion.py                two maps → position (triangulation)
-│   ├── camera_view.py           Insta360 X4 capture + 360° reframing
-│   ├── validate_offline.py      checks the Python against the MATLAB results
-│   └── matlab_original/         the MATLAB files it was ported from
+│   ├── live_tracker.py          main program
+│   ├── rig_config.py            your rig's measurements
+│   └── ...                      doa_core.py, fusion.py, camera_view.py
 │
-├── main_2mic.m              ← OFFLINE ANALYSIS (MATLAB): start here
-├── run_doa.m                   validated SRP direction estimator
-├── az_power_map.m              accumulated azimuth map for one array
-├── triangulate.m               position from two arrays
-├── build_steering_matrix.m     spherical-harmonic steering, frequency-dependent order
-├── check_mic_yaw.m             relative rotation between the arrays
-├── align_two_mics.m            puts two recorders on one clock
-├── test_all_takes.m            regression scoreboard over every take
-├── test_*.m                    individual investigations
-└── *.pptx                      project reports
+├── matlab/            🧮 offline analysis (MATLAB)       → matlab/README.md
+│   ├── main_2mic.m              start here: two recordings → az, el, distance
+│   ├── test_all_takes.m         regression scoreboard over every take
+│   ├── run_doa.m, triangulate.m, ...   the building blocks
+│   └── investigations/          one-off studies behind the method
+│
+├── tools/             usb-speed-check.ps1 (Windows: check the Zylia's USB link)
+├── docs/              images for the READMEs
+└── data/              your recordings go here (not in git)
 ```
+
+| I want to… | Go to |
+|---|---|
+| track sounds live with the mics and the 360° camera | [`INSTA360/README.md`](INSTA360/README.md) |
+| analyse recordings, reproduce the results | [`matlab/README.md`](matlab/README.md) |
+| understand why the method is built this way | [Key findings](#-key-findings) below |
+
+## 🎧 Data
+
+The recordings (~4.6 GB of WAV) aren't in the repository. Put your own in
+**`data/`**. Both the MATLAB scripts and the Python validation look there, and
+in the repo root.
+
+- **Zylia ZM-1:** convert with *ZYLIA Ambisonics Converter* to `…_(ACN-SN3D-3).wav` (16-ch ACN/SN3D, 3rd order) for MATLAB. The live tracker and `--record` use the raw 19-channel file.
+- **Zoom H3-VR:** its own 4-ch AmbiX WAV, as recorded.
 
 ## 🧮 Offline analysis in MATLAB
 
-Open `main_2mic.m`, pick a take in section 1 (each take carries its own truth, baseline, layout and yaw), and press Run. It prints az / el / distance and draws three figures: per-frame estimates, polar SRP maps, and the fused position map.
+> Full guide: [`matlab/README.md`](matlab/README.md)
 
-| Script | Use it for |
-|---|---|
-| `main_2mic.m` | two arrays → azimuth, elevation, **distance** |
-| `main_doa_estimation.m` | one array → direction only |
-| `test_all_takes.m` | after changing code: re-runs every take into one table |
-| `check_recording.m` | sanity-check an exported WAV |
-| `synthetic_test.m` | end-to-end check on a synthetic source |
+1. Put the recordings in `data/`.
+2. Open **`matlab/main_2mic.m`**, choose a take in section 1, press **Run**.
+3. It prints az / el / distance with a trust verdict, and draws the per-frame estimates, the polar power maps and the fused position map.
 
-Recordings (~4.6 GB of WAV) aren't in the repo. The scripts expect them in the repo root. Zylia files must be converted with ZYLIA Ambisonics Converter to `_(ACN-SN3D-3).wav`.
-
-Reports: `DOA_Project_Presentation.pptx` (method), `DOA_Distance_Report.pptx` (how distance was solved), `DOA_Limit_Tests.pptx` (pushing it until it breaks).
+After changing any code, run `matlab/test_all_takes.m`: it re-runs every take and prints one scoreboard. Needs base MATLAB plus the Signal Processing Toolbox.
 
 ## 📋 Recording protocol
 

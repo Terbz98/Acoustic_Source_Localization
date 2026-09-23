@@ -39,6 +39,7 @@ function test_angle_sweep
 %     tell the angles apart.
 %  7. Clap at mic height, arms out, not over your head. Write the order down.
 % -------------------------------------------------------------------------
+addpath(fullfile(fileparts(mfilename('fullpath')), '..')); setup_paths;   % code + recordings on the path
 
 %% ---- edit these ---------------------------------------------------------
 zyliaFile = 'sweepzylia_(ACN-SN3D-3).wav';

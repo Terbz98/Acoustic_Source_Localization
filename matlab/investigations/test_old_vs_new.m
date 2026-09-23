@@ -9,6 +9,7 @@ function test_old_vs_new
 % real_sh_matrix, sph_hankel2 -- is already confirmed byte-identical by md5, so
 % the per-mic bearings cannot have moved. This checks the one file that DID
 % change.
+addpath(fullfile(fileparts(mfilename('fullpath')), '..')); setup_paths;   % code + recordings on the path
 
 pairs = {
   '2miczyliafront_(ACN-SN3D-3).wav'      '2miczoomfront.WAV'       'FRONT VOICE'

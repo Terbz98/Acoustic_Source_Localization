@@ -9,6 +9,7 @@
 %    2. Run this file.
 %    3. Read the VERDICT lines.
 
+addpath(fileparts(mfilename('fullpath'))); setup_paths;   % code + recordings on the path
 wavFile = 'zoomh3vrfront.wav';     % <-- EDIT: your exported recording
 
 % --------------------------------------------------------------------

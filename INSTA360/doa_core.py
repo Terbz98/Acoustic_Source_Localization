@@ -1,7 +1,7 @@
 """
 doa_core.py -- direction of arrival for ONE spherical array, frame by frame.
 
-This is a Python port of the validated MATLAB path in matlab_original/:
+This is a Python port of the validated MATLAB code in ../matlab/:
 
     run_doa.m / az_power_map.m     frequency-domain steered-response power (SRP)
     build_steering_matrix.m        SH steering vectors, frequency-dependent order

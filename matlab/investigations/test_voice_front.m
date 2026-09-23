@@ -12,6 +12,7 @@ function test_voice_front
 %
 % This is a test_ script: it never becomes the headline. main_2mic.m stays the
 % one-take-at-a-time entry point.
+addpath(fullfile(fileparts(mfilename('fullpath')), '..')); setup_paths;   % code + recordings on the path
 
 pairs = {
     '2miczyliafront_(ACN-SN3D-3).wav',     '2miczoomfront.WAV',      'FRONT VOICE  (the 1.7 m one)'

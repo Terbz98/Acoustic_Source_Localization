@@ -3,6 +3,7 @@
 # run 30-100 MB, over GitHub's 100 MB per-file limit. The recordings
 # are the raw data, not the project -- they live outside git.
 # ---------------------------------------------------------------
+data/
 *.wav
 *.WAV
 *.wv
@@ -16,11 +17,8 @@ old code (vaulted)/
 # Stale duplicate of the source tree (older copies of the same .m files)
 專題/
 
-# Superseded drafts of the distance report; the final one is
-# DOA_Distance_Report.pptx
-DOA_Distance_Solved.pptx
-DOA_Distance_Solved_v2.pptx
-DOA_Distance_Solved_BEFORE_slide15-17_rewrite.pptx
+# Slide decks: kept locally, not published
+*.pptx
 
 # MATLAB
 *.asv
@@ -32,9 +30,9 @@ slprj/
 # macOS
 .DS_Store
 
-# Python (INSTA360TIME live tracker)
+# Python (INSTA360 live tracker)
 .venv/
 __pycache__/
-INSTA360TIME/recordings/
-INSTA360TIME/logs/
-INSTA360TIME/x4_frame.jpg
+INSTA360/recordings/
+INSTA360/logs/
+INSTA360/x4_frame.jpg

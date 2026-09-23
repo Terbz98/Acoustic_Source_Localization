@@ -32,6 +32,7 @@ function test_zoom_offset
 % The front clap take is excluded on purpose: its source position is disputed,
 % so its "error" is not an error. The two side takes are excluded too -- they
 % were a front-back rig with unmeasured yaw of their own.
+addpath(fullfile(fileparts(mfilename('fullpath')), '..')); setup_paths;   % code + recordings on the path
 
 T = {
 % name              zylia file                                zoom file                    gtAz    gtR    session

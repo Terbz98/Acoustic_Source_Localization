@@ -11,10 +11,10 @@ loop) and steered with the rigid-sphere capsule model. Pass --sh to also run
 the converted 16-channel ACN/SN3D files through the SH path, which is a
 straight port of run_doa.m, to compare the two.
 
-    .venv/bin/python validate_offline.py            # from INSTA360TIME/
+    .venv/bin/python validate_offline.py            # from INSTA360/
     .venv/bin/python validate_offline.py --sh
 
-Recordings are read from the parent folder (where main_2mic.m expects them).
+Recordings are read from <repo>/data/ if it exists, otherwise from the repo root.
 """
 
 import use_project_python  # noqa: F401  (restarts on .venv/bin/python if needed)
@@ -30,7 +30,9 @@ from doa_core import SrpArray, whole_file_map, zylia_config, zoom_config, wrap18
 from fusion import Triangulator, rig_layout
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.dirname(HERE)
+REPO = os.path.dirname(HERE)
+# recordings: <repo>/data/ if it exists, else the repo root (like matlab/setup_paths.m)
+DATA = os.path.join(REPO, 'data') if os.path.isdir(os.path.join(REPO, 'data')) else REPO
 
 # name, zylia raw, zoom, gt az, gt el, gt r (from MIDPOINT), yawB, layout,
 # MATLAB result (az, el, r) from the 2026-08-18/21 scoreboard in README.md

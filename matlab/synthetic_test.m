@@ -1,4 +1,5 @@
 clear; clc; close all;
+addpath(fileparts(mfilename('fullpath'))); setup_paths;   % code + recordings on the path
 
 fs   = 48000;
 dur  = 4;                 % seconds

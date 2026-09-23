@@ -15,6 +15,7 @@ function test_yaw_attribution
 % in the CLAP take, and its yaw is (clap relative) - (voice per-take), not the
 % even split. Then run the front clap through triangulate at that yaw and see
 % whether the distance comes back on its own.
+addpath(fullfile(fileparts(mfilename('fullpath')), '..')); setup_paths;   % code + recordings on the path
 
 azFrontVoiceA = 16.47;  azFrontVoiceB = -15.95;   % run_doa medians, this session
 azFrontClapA  =  5.42;  azFrontClapB  = -11.16;

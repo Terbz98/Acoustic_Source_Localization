@@ -73,6 +73,7 @@ function test_level_ratio
 % measurement does not care which way either mic was pointing -- no yaw, no
 % bearing, no steering. Direct sound only: a short window from each transient
 % onset, before the floor bounce arrives (3.9 ms for a 1.2 m mic at 1.5 m).
+addpath(fullfile(fileparts(mfilename('fullpath')), '..')); setup_paths;   % code + recordings on the path
 
 WIN_MS = [1.5 2.5 4.0];      % direct-sound window lengths to try
 

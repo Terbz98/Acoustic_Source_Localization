@@ -19,6 +19,7 @@ function test_level_bias
 % gateRelMaxDb. Gating on the max instead keeps only the clap and its tail on a
 % clap take -- 47 frames of reverberation -- and every conclusion drawn from
 % that is about the room, not the source.
+addpath(fullfile(fileparts(mfilename('fullpath')), '..')); setup_paths;   % code + recordings on the path
 
 files = {
   '2miczyliafront_(ACN-SN3D-3).wav'      'FRONT VOICE'  0
