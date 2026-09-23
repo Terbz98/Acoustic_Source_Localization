@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎯 Acoustic Source Localization
+#  Acoustic Source Localization
 
 **Find where a sound is coming from (direction *and* distance) with two spherical microphone arrays, and point a 360° camera at it in real time.**
 
