@@ -11,7 +11,7 @@ Edit rig_config.py for your setup first. Then, from INSTA360/:
     .venv/bin/python live_tracker.py --list-devices     # are both mics there?
     .venv/bin/python live_tracker.py --no-camera        # audio only: radar view
     .venv/bin/python live_tracker.py                    # audio + X4 (Webcam mode)
-    .venv/bin/python live_tracker.py --record           # ALSO save both mics to recordings/
+    .venv/bin/python live_tracker.py --record           # ALSO record every mic + a window video to recordings/
     .venv/bin/python live_tracker.py --calibrate 1.5 0  # measure the mic yaws (see README)
     .venv/bin/python live_tracker.py --replay ../2micdirectfrontzylia1.wav ../2micdirectfrontzoom1.WAV
 
@@ -77,10 +77,15 @@ class LiveInput:
         self.n_ch = n_ch
         self.q = queue.Queue()
         self.overflows = 0
+        self.t0_wall = None         # wall-clock time of the stream's first sample
+        self.delivered = 0          # samples handed out by get() so far
+        self.chunk_t0 = None        # wall-clock time of the first sample of the last get()
         self.stream = sd.InputStream(device=self.index, channels=n_ch, samplerate=fs,
                                      dtype='float32', latency='low', callback=self._cb)
 
     def _cb(self, indata, frames, t, status):
+        if self.t0_wall is None:
+            self.t0_wall = time.time() - frames / self.fs
         if status and status.input_overflow:
             self.overflows += 1
         self.q.put(indata.copy())
@@ -99,7 +104,12 @@ class LiveInput:
                 out.append(self.q.get_nowait())
         except queue.Empty:
             pass
-        return np.concatenate(out) if out else None
+        if not out:
+            return None
+        x = np.concatenate(out)
+        self.chunk_t0 = (self.t0_wall or time.time()) + self.delivered / self.fs
+        self.delivered += len(x)
+        return x
 
     exhausted = False
 
@@ -245,6 +255,7 @@ class Tracker:
         self.cam_pos = np.asarray(RC.CAMERA_POS_M, float)
         self.state = None
         self.recorder = None
+        self.x4src = None           # the X4's own stereo mic: recorded for the video, not analysed
         self.stop_evt = threading.Event()
         self.publish_every = max(1, int(self.zyl.frame_rate / args.update_hz))
         self._next_pub = self.publish_every
@@ -273,8 +284,12 @@ class Tracker:
                     continue
                 got = True
                 if self.recorder is not None:
-                    self.recorder.write(tag, x)
+                    self.recorder.write(tag, x, getattr(src, 'chunk_t0', None))
                 trk.feed(x)
+            if self.x4src is not None:
+                x = self.x4src.get()
+                if x is not None and self.recorder is not None:
+                    self.recorder.write('x4', x, self.x4src.chunk_t0)
             if self.zyl.acc.frame >= self._next_pub:
                 self._next_pub = self.zyl.acc.frame + self.publish_every
                 self.publish()
@@ -475,27 +490,39 @@ class SoundEvents:
 
 # ======================= recording =======================================
 class Recorder:
-    """Writes both raw streams to WAV while tracking. Zylia: the 19 raw
+    """Writes the raw streams to WAV while tracking. Zylia: the 19 raw
     capsules (open in ZYLIA Studio / convert with ZYLIA Ambisonics Converter
-    to feed main_2mic.m). Zoom: 4-ch AmbiX, like the recorder's own files."""
+    to feed main_2mic.m). Zoom: 4-ch AmbiX, like the recorder's own files.
+    X4: its own stereo microphone, used as the sound of the window video.
+    On close it writes the start time of every file (_sync.json) and, if the
+    window was filmed, joins video and sound into one MP4."""
 
-    def __init__(self, folder, zsrc, osrc, zoom_format):
+    def __init__(self, folder, zsrc, osrc, zoom_format, x4src=None):
         import soundfile as sf
         os.makedirs(folder, exist_ok=True)
         stamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        self.folder, self.stamp = folder, stamp
         self.files = {'zylia': sf.SoundFile(os.path.join(folder, f'live_{stamp}_zylia19.wav'), 'w',
                                             int(zsrc.fs), 19, 'PCM_24')}
         if osrc is not None:
             self.files['zoom'] = sf.SoundFile(
                 os.path.join(folder, f'live_{stamp}_zoom_{zoom_format}.wav'), 'w',
                 int(osrc.fs), 4, 'PCM_24')
+        if x4src is not None:
+            self.files['x4'] = sf.SoundFile(os.path.join(folder, f'live_{stamp}_x4_stereo.wav'), 'w',
+                                            int(x4src.fs), 2, 'PCM_24')
         self.path_hint = os.path.join(folder, f'live_{stamp}_*')
+        self.t_start = {}           # wall-clock time of each file's first sample
+        self.zsrc = zsrc
+        self.video = None           # (path, start time) of the window video, set by the GUI
         self._lock = threading.Lock()
 
-    def write(self, tag, x):
+    def write(self, tag, x, t0=None):
         with self._lock:
             f = self.files.get(tag)
             if f is not None and not f.closed:
+                if tag not in self.t_start:
+                    self.t_start[tag] = t0 if t0 is not None else time.time() - len(x) / f.samplerate
                 f.write(x[:, :f.channels])
 
     def close(self):
@@ -503,6 +530,151 @@ class Recorder:
             for f in self.files.values():
                 f.close()
         print(f'Saved {self.path_hint}')
+        # timing of every file, so sounds (time_s in the CSV = Zylia stream
+        # time) can be found in the audio files and in the video later
+        sync = dict(files={k: os.path.basename(f.name) for k, f in self.files.items()},
+                    start_wall_s=self.t_start,
+                    zylia_stream_start_wall_s=getattr(self.zsrc, 't0_wall', None),
+                    video=None if self.video is None else os.path.basename(self.video[0]),
+                    video_start_wall_s=None if self.video is None else self.video[1])
+        with open(os.path.join(self.folder, f'live_{self.stamp}_sync.json'), 'w') as fh:
+            json.dump(sync, fh, indent=2)
+        if self.video is not None:
+            try:
+                add_sound_to_video(self)
+            except Exception as e:
+                print(f'Could not add the sound to the video ({e}); the silent video '
+                      f'and the WAV files are still saved.')
+
+
+class WindowVideo:
+    """Screen recording of the tracker window (what you see), saved next to
+    the audio while recording. Written at FPS by a background thread so the
+    window never waits for the video encoder."""
+
+    FPS = 15
+
+    def __init__(self, path, size):
+        import cv2
+        self.path, self.size = path, size
+        self.w = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*'mp4v'), self.FPS, size)
+        self.q = queue.Queue(maxsize=4)
+        self.t0 = self.t_next = time.time()
+        self.owed = 0
+        self.th = threading.Thread(target=self._run, daemon=True)
+        self.th.start()
+
+    def offer(self, canvas):
+        now = time.time()
+        if now < self.t_next:
+            return
+        # repeat the frame if the window fell behind, so the video keeps real time
+        n = 1 + int((now - self.t_next) * self.FPS)
+        self.t_next += n / self.FPS
+        self.owed += n
+        self.last = canvas
+        try:
+            self.q.put_nowait((canvas, self.owed))
+            self.owed = 0
+        except queue.Full:
+            pass
+
+    def _run(self):
+        import cv2
+        while True:
+            item = self.q.get()
+            if item is None:
+                break
+            img, n = item
+            img = cv2.resize(img, self.size, interpolation=cv2.INTER_AREA)
+            for _ in range(n):
+                self.w.write(img)
+        self.w.release()
+
+    def close(self):
+        if self.owed:                   # frames still owed when the queue was full
+            self.q.put((self.last, self.owed))
+        self.q.put(None)
+        self.th.join(timeout=30)
+        print(f'Saved {self.path}')
+
+
+def add_sound_to_video(rec):
+    """Silent window video + recorded audio -> one MP4 with sound (H.264 +
+    AAC, plays in QuickTime, Keynote, PowerPoint). Uses macOS's own
+    AVFoundation, so no ffmpeg is needed. Sound: the X4's own stereo mic
+    (recorded from the camera's spot, like any video), else the Zoom as
+    stereo (left / right virtual mics), else the Zylia's capsules summed."""
+    import soundfile as sf
+    import AVFoundation as AVF
+    import CoreMedia as CM
+    from Foundation import NSURL
+    vpath, vt0 = rec.video
+    tag = next((t for t in ('x4', 'zoom', 'zylia') if t in rec.t_start), None)
+    if tag is None:
+        raise RuntimeError('no audio was recorded')
+    x, fs = sf.read(rec.files[tag].name, dtype='float32', always_2d=True)
+    if tag == 'x4':
+        mix = x[:, :2].copy()
+    elif tag == 'zoom':                     # AmbiX W, Y -> left / right cardioids
+        mix = 0.5 * np.stack([x[:, 0] + x[:, 1], x[:, 0] - x[:, 1]], 1)
+    else:
+        m = x[:, :19].mean(1)
+        mix = np.stack([m, m], 1)
+    lag = int(round((rec.t_start[tag] - vt0) * fs))   # audio start relative to video start
+    mix = mix[-lag:] if lag < 0 else np.vstack([np.zeros((lag, 2), np.float32), mix])
+    peak = float(np.max(np.abs(mix))) if len(mix) else 0.0
+    if peak > 0:
+        mix *= min(10 ** (-1 / 20) / peak, 100.0)     # loud enough to hear, never clipped
+    tmp_wav = vpath[:-4] + '_sound.wav'
+    sf.write(tmp_wav, mix, fs, 'PCM_16')
+    out = vpath.replace('_silent.mp4', '.mp4')
+    if os.path.exists(out):
+        os.remove(out)
+    print(f'Adding the sound ({tag} mic) to the video...', end=' ', flush=True)
+    va = AVF.AVURLAsset.URLAssetWithURL_options_(NSURL.fileURLWithPath_(vpath), None)
+    aa = AVF.AVURLAsset.URLAssetWithURL_options_(NSURL.fileURLWithPath_(tmp_wav), None)
+    comp = AVF.AVMutableComposition.composition()
+    dur = va.duration()
+    rng = CM.CMTimeRangeMake(CM.kCMTimeZero, dur)
+    for asset, kind in ((va, AVF.AVMediaTypeVideo), (aa, AVF.AVMediaTypeAudio)):
+        src = asset.tracksWithMediaType_(kind)
+        if not src:
+            raise RuntimeError(f'no {kind} track')
+        tr = comp.addMutableTrackWithMediaType_preferredTrackID_(kind, 0)
+        r = rng if kind == AVF.AVMediaTypeVideo else CM.CMTimeRangeMake(
+            CM.kCMTimeZero, CM.CMTimeMinimum(dur, asset.duration()))
+        ok, err = tr.insertTimeRange_ofTrack_atTime_error_(r, src[0], CM.kCMTimeZero, None)
+        if not ok:
+            raise RuntimeError(str(err))
+    ex = AVF.AVAssetExportSession.alloc().initWithAsset_presetName_(
+        comp, AVF.AVAssetExportPresetHighestQuality)
+    ex.setOutputURL_(NSURL.fileURLWithPath_(out))
+    ex.setOutputFileType_(AVF.AVFileTypeMPEG4)
+    ex.exportAsynchronouslyWithCompletionHandler_(lambda: None)
+    while ex.status() in (0, 1, 2):       # unknown, waiting, exporting
+        time.sleep(0.2)
+    if ex.status() != 3:                  # completed
+        raise RuntimeError(str(ex.error()))
+    os.remove(tmp_wav)
+    os.remove(vpath)
+    print(f'done.\nSaved {out}')
+
+
+def save_sound_pictures(folder, ev, frame, view, canvas):
+    """One set of pictures per detected sound, for checking results and for
+    slides: the whole 360 frame from the X4 at that moment, the camera view
+    pointed exactly at the sound, and the whole tracker window."""
+    import cv2
+    os.makedirs(folder, exist_ok=True)
+    r = 'nodist' if ev['r'] is None else f"{ev['r']:.2f}m"
+    base = os.path.join(folder, f"sound_{ev['n']:03d}_az{ev['az']:+.0f}_el{ev['el']:+.0f}_{r}")
+    if frame is not None:
+        cv2.imwrite(base + '_360.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 92])
+    if view is not None:
+        cv2.imwrite(base + '_view.jpg', view, [cv2.IMWRITE_JPEG_QUALITY, 92])
+    if canvas is not None:
+        cv2.imwrite(base + '_window.jpg', canvas, [cv2.IMWRITE_JPEG_QUALITY, 88])
 
 
 # ======================= calibration =====================================
@@ -729,6 +901,10 @@ def gui_loop(tracker, cam, reframer, args):
     look = dir_vec(0, 0)
     canvas = None
     saved_frame = False
+    video = None
+    sounds = tracker.sounds
+    pic_dir = sounds.csv_path[:-4] if sounds is not None and sounds.csv_path else None
+    n_pics = 0                                      # sounds already photographed
     t_prev = time.time()
     while not tracker.stop_evt.is_set():
         st = tracker.state
@@ -787,6 +963,26 @@ def gui_loop(tracker, cam, reframer, args):
         canvas = np.vstack([np.hstack([view, radar]), np.hstack([pano, info])])
         cv2.imshow(win, canvas)
 
+        if pic_dir is not None and len(sounds.events) > n_pics:
+            for ev in sounds.events[n_pics:]:
+                shot = None
+                if frame is not None and ev.get('cam_az') is not None:
+                    shot = reframer.render(frame, ev['cam_az'], ev['cam_el'], yaw_now, mirror, upside)
+                try:
+                    save_sound_pictures(pic_dir, ev, frame, shot, canvas)
+                except Exception as e:
+                    print(f'  (could not save pictures of sound {ev["n"]}: {e})')
+            n_pics = len(sounds.events)
+
+        # screen video of the window while recording (R / --record)
+        if tracker.recorder is not None and video is None:
+            rec = tracker.recorder
+            video = WindowVideo(os.path.join(rec.folder, f'live_{rec.stamp}_video_silent.mp4'),
+                                (canvas.shape[1] // 2 // 2 * 2, canvas.shape[0] // 2 // 2 * 2))
+            rec.video = (video.path, video.t0)
+        if video is not None:
+            video.offer(canvas)
+
         key = cv2.waitKey(15) & 0xFF
         if key in (ord('q'), 27):
             break
@@ -804,12 +1000,20 @@ def gui_loop(tracker, cam, reframer, args):
                 tracker.zoom.clear()
         elif key == ord('r') and not isinstance(tracker.zsrc, FileInput):
             if tracker.recorder is None:
-                tracker.recorder = Recorder(args.record_dir, tracker.zsrc, tracker.osrc, args.zoom_format)
+                tracker.recorder = Recorder(args.record_dir, tracker.zsrc, tracker.osrc, args.zoom_format,
+                                            tracker.x4src)
                 print('Recording to', tracker.recorder.path_hint)
             else:
                 rec, tracker.recorder = tracker.recorder, None
+                if video is not None:           # finish the video before adding its sound
+                    video.close()
+                    video = None
                 rec.close()
     tracker.stop_evt.set()
+    if video is not None:
+        video.close()
+    if pic_dir is not None and n_pics:
+        print(f'Pictures of every sound saved to {pic_dir}/')
     if args.snapshot and canvas is not None:
         cv2.imwrite(args.snapshot, canvas)
     cv2.destroyAllWindows()
@@ -912,11 +1116,19 @@ def main():
     print('Building steering matrices...', end=' ', flush=True)
     tracker = Tracker(zsrc, osrc, args)
     print('done.')
+    x4src = None
+    if not args.replay and not args.calibrate:
+        try:                                    # the X4 in Webcam mode is also a stereo mic
+            x4src = LiveInput(RC.CAMERA_NAME, 2, RC.SAMPLE_RATE)
+            print(f'X4 mic: {x4src.name} (the sound of the recorded video)')
+        except (SystemExit, Exception):
+            x4src = None
+    tracker.x4src = x4src
     print(f'Rig: {RC.LAYOUT}, baseline {RC.BASELINE_M:.2f} m, yaw Zylia {RC.YAW_ZYLIA_DEG:+.2f}, '
           f'Zoom {RC.YAW_ZOOM_DEG:+.2f}' if use_zoom else 'Zylia only: direction, no distance')
 
     if args.record and not args.replay:
-        tracker.recorder = Recorder(args.record_dir, zsrc, osrc, args.zoom_format)
+        tracker.recorder = Recorder(args.record_dir, zsrc, osrc, args.zoom_format, x4src)
         print('Recording to', tracker.recorder.path_hint)
 
     if not args.calibrate:
@@ -928,7 +1140,7 @@ def main():
               'dist = distance from the middle of the two mics.'
               + (f'\n  Also saved to {log}' if log else '') + '\n', flush=True)
 
-    for s in (zsrc, osrc):
+    for s in (zsrc, osrc, x4src):
         if s is not None:
             s.start()
     try:
@@ -975,7 +1187,7 @@ def main():
         if args.replay:
             replay_summary(tracker.history, args.truth_az)
     finally:
-        for s in (zsrc, osrc):
+        for s in (zsrc, osrc, x4src):
             if s is not None:
                 s.stop()
         if tracker.recorder is not None:

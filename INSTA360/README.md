@@ -6,7 +6,7 @@ out **where the sound is (azimuth, elevation, distance)** and turns a virtual
 camera, cut out of an Insta360 X4's 360° video, to face it.
 
 <p align="center">
-  <img src="../docs/live_tracker_panel.png" width="330" alt="Radar and per-sound readout">
+  <img src="../docs/demo.gif" width="560" alt="Live tracker window: camera view, radar, 360° strip and per-sound readout">
 </p>
 
 ## Contents
@@ -89,7 +89,7 @@ Listening. Every sound (clap, word, knock...) gets one line below:
 | `live_tracker.py` | mics + camera (default) |
 | `live_tracker.py --no-camera` | radar and numbers only |
 | `live_tracker.py --zylia-only` | ignore the Zoom: direction only, no distance |
-| `live_tracker.py --record` | also save both mics to `recordings/` as WAV |
+| `live_tracker.py --record` | also record every mic (WAV) and a video of the window with sound to `recordings/` |
 | `live_tracker.py --headless` | no window, terminal output only |
 | `live_tracker.py --udp 127.0.0.1:9870` | also send every estimate as JSON over UDP |
 | `live_tracker.py --replay ZYLIA.wav ZOOM.wav` | run recordings through the live pipeline |
@@ -112,7 +112,7 @@ All options: `live_tracker.py --help`.
 | Key | Action |
 |---|---|
 | `Q` | quit |
-| `R` | start / stop recording |
+| `R` | start / stop recording (every mic + a video of the window with sound) |
 | `B` | look out of the other side of the X4 |
 | `U` | upside-down (X4 mounted upside down) |
 | `-` `=` | zoom out / in |
@@ -165,6 +165,10 @@ wrong way when you move, set `CAMERA_MIRROR = True`.
 | `logs/sounds_<date>_<time>.csv` | one row per sound: `sound, clock, time_s, duration_s, azimuth_deg, elevation_deg, distance_m, how, zylia_az_deg, zylia_el_deg, zoom_az_deg, frames, evidence`. Opens in Excel |
 | `recordings/live_<date>_<time>_zylia19.wav` | Zylia, 19 raw channels, 48 kHz / 24-bit (with `--record` or `R`) |
 | `recordings/live_<date>_<time>_zoom_ambix.wav` | Zoom, 4-ch AmbiX, 48 kHz / 24-bit |
+| `recordings/live_<date>_<time>_x4_stereo.wav` | the X4's own stereo microphone (when the X4 is connected) |
+| `recordings/live_<date>_<time>_video.mp4` | video of the window with the X4's sound, made when recording stops (takes up to a minute; the window may freeze meanwhile) |
+| `recordings/live_<date>_<time>_sync.json` | start time of every file, to line up the CSV's `time_s`, the WAVs and the video |
+| `logs/sounds_<date>_<time>/sound_NNN_az…_el…_<dist>_{360,view,window}.jpg` | three pictures per sound: the X4's 360° frame at that moment, the view aimed exactly at the sound, and the whole window |
 | `logs/x4_frame.jpg` | one camera frame, to check the camera orientation |
 
 To analyse a recording in MATLAB: convert the `_zylia19.wav` with **ZYLIA

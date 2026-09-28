@@ -9,11 +9,10 @@
 ![macOS](https://img.shields.io/badge/macOS-live%20tracker-lightgrey)
 ![Status](https://img.shields.io/badge/status-active%20research-brightgreen)
 
-<!-- PLACEHOLDER: replace with a demo GIF of the live tracker + Insta360 X4 view (e.g. docs/demo.gif) -->
-<img src="docs/live_tracker_panel.png" width="360" alt="Live tracker: top-view radar and per-sound readout">
+<img src="docs/demo.gif" width="720" alt="Live tracker: the Insta360 X4 view turns to the person talking, with the top-view radar, the 360° strip and the list of sounds">
 
-<sub>The live tracker replaying a recorded take: a talker 1.58 m away, straight in front of the Zylia.<br>
-The two mics' direction maps (orange and blue) cross where the sound is. Every sound gets its own line.</sub>
+<sub>Live, in a sound-proof room: the camera view turns to whoever is talking.<br>
+Top left: the view cut out of the X4's 360° picture. Top right: the two mics' directions crossing at the sound. Bottom: the whole room and one line per sound.</sub>
 
 </div>
 
@@ -24,6 +23,7 @@ The two mics' direction maps (orange and blue) cross where the sound is. Every s
 - 🧭 **Direction within a few degrees** (under 3° on most takes, 6.2° worst), with elevation from the 3rd-order Zylia array.
 - 📏 **Distance within 3–6% of a tape measure** by triangulating two arrays 1 m apart. A single array can't measure distance at all ([here's why](#-key-findings)).
 - 🎥 **Live mode:** a Zylia ZM-1 and a Zoom H3-VR stream into Python, and an Insta360 X4's 360° video turns to face whoever is talking or clapping.
+- 🎯 **Tested live:** in a sound-proof room the view lands about 1° from a talker's mouth, and a voice 1.3–1.8 m away is placed within about 0.15 m ([details](#live-test-in-a-sound-proof-room)).
 - 📝 **Every sound logged:** each clap or word gets az / el / distance on screen, in the terminal, and in a CSV file.
 - ✅ **Validated:** the Python port reproduces the MATLAB results on the same recordings.
 
@@ -125,6 +125,18 @@ Recorded takes with a tape-measured truth, source ≈ 1.5 m away. "Live" means t
 - **Azimuth is inside 6.2° on every take**, including the ones where distance failed.
 - **Elevation** reads +15.6° against about +16–17° measured three independent ways (Zylia only; see limitations).
 - Takes with an **unmeasured rig rotation** give +60 to +109% distance error with the same method. That's why the recording protocol below exists.
+
+### Live test in a sound-proof room
+
+28 September 2026: 3 min 15 s of talking, clapping, walking behind the rig and a phone playing bird song, 132 sounds located live. The rig was set up as above (mics 1 m apart, X4 in the middle). The truth here comes from the X4 pictures the tracker saves for every sound: where the mouth or phone is in the picture (direction), and the person's height and feet in the 360° frame (distance). No tape measure, so read these as good estimates.
+
+| Check | Result |
+|---|---|
+| Talking: view centre vs. the mouth | typically 1°, all 8 checks within 4° |
+| Phone held still | typically 5°, 6 of 7 within 6° (one 18° miss) |
+| Phone swept around | typically 9° (the view trails a moving source) |
+| Distance of a voice 1.3–1.8 m away | typically 0.15 m off (6 checks, from 0.3 m short to 0.6 m far) |
+| Stomps and steps on the floor | direction right, distance 0.2–1 m too far (5 checks) |
 
 ## 📁 Repository layout
 
