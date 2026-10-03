@@ -93,6 +93,7 @@ Listening. Every sound (clap, word, knock...) gets one line below:
 | `live_tracker.py --headless` | no window, terminal output only |
 | `live_tracker.py --udp 127.0.0.1:9870` | also send every estimate as JSON over UDP |
 | `live_tracker.py --replay ZYLIA.wav ZOOM.wav` | run recordings through the live pipeline |
+| `analyze_recording.py [recordings/live_<date>_<time>] [--sound N]` | the three MATLAB `main_2mic.m` figures (per-frame estimates, direction scores, top-view position map) for a recording; newest recording if none is named |
 | `live_tracker.py --calibrate X Y` | measure the mic yaw ([below](#calibrate-once-per-rig-build)) |
 | `live_tracker.py --list-devices` | list audio devices |
 | `camera_view.py --list` | list cameras and their formats |
@@ -226,5 +227,6 @@ take: az −0.7°, el +15.6°, identical to MATLAB).
 | `doa_core.py` | one array: steering vectors, SRP maps, gates, accumulation (port of `run_doa.m`, `az_power_map.m`, `build_steering_matrix.m`) |
 | `fusion.py` | two arrays → position (port of `triangulate.m`) |
 | `camera_view.py` | X4 capture (AVFoundation, auto-reconnect) and 360° reframing |
+| `analyze_recording.py` | MATLAB-style figures for a recording, saved to `logs/figures/` |
 | `validate_offline.py` | scoreboard against the recorded takes |
 | `use_project_python.py` | makes every script run on `.venv` |
