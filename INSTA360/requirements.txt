@@ -5,3 +5,4 @@ soundfile==0.13.1
 opencv-python==5.0.0.93
 pyobjc-framework-AVFoundation==11.1
 pyobjc-framework-libdispatch==11.1
+matplotlib==3.9.4
