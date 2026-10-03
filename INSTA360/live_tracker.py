@@ -914,6 +914,8 @@ def gui_loop(tracker, cam, reframer, args):
     sounds = tracker.sounds
     pic_dir = sounds.csv_path[:-4] if sounds is not None and sounds.csv_path else None
     n_pics = 0                                      # sounds already photographed
+    heat_hist = collections.deque()                 # recent sound maps, for the delayed heat map
+    pic_delay = getattr(RC, 'X4_PICTURE_DELAY_S', 0.0) if not args.camera_file else 0.0
     t_prev = time.time()
     while not tracker.stop_evt.is_set():
         st = tracker.state
@@ -952,14 +954,21 @@ def gui_loop(tracker, cam, reframer, args):
             top = (pw // 2 - Hb * K) // 2
             pano = np.ascontiguousarray(pano[top:top + Hb * K])
             # where sound is coming from, as a heat map over the 360 strip
-            # (the Zylia's az x el map, redrawn as the camera sees it)
+            # (the Zylia's az x el map, redrawn as the camera sees it), held
+            # back by the picture's delay so it lights up when the picture
+            # shows the sound being made
             zs = st.get('zylia') if st else None
             if zs is not None and st.get('src') is not None:
-                vals = camera_values(zs['map2d'], tracker.zyl.srp.az_deg, tracker.zyl.srp.el_deg,
-                                     tracker.posA, RC.YAW_ZYLIA_DEG, st['src'], tracker.cam_pos,
+                heat_hist.append((now, zs['map2d'], zs['map2d_w'], st['src']))
+            while len(heat_hist) > 1 and heat_hist[1][0] <= now - pic_delay:
+                heat_hist.popleft()
+            if heat_hist and heat_hist[0][0] <= now - pic_delay:
+                _, m2, w2, src = heat_hist[0]
+                vals = camera_values(m2, tracker.zyl.srp.az_deg, tracker.zyl.srp.el_deg,
+                                     tracker.posA, RC.YAW_ZYLIA_DEG, src, tracker.cam_pos,
                                      220, 75, yaw_now + 180.0, 360.0 / 220,
                                      90.0 - top / (pw // 2) * 180.0, mirror)
-                paint(pano, vals, zs['map2d_w'] / max(RC.MIN_EVIDENCE, 1e-3))
+                paint(pano, vals, w2 / max(RC.MIN_EVIDENCE, 1e-3))
             fov = reframer.hfov
         else:
             view = np.full((H * K, Wv * K, 3), 18, np.uint8)

@@ -6,9 +6,10 @@ The tracker's window video shows a green circle (where the view points) and a
 red cross (where the sound is) on the 360 strip. This replays the recorded
 audio through the tracker's own pipeline (same gate, same 0.6 s memory),
 paints the az x el sound map over the strip of every video frame, removes the
-old circle and cross, and keeps the original sound, moved earlier by how much
-later the X4's microphone is than its picture (rig_config.X4_AUDIO_DELAY_S
-minus X4_PICTURE_DELAY_S) so sound and picture line up.
+old circle and cross, and keeps the original sound, moved by the difference
+between how late the X4's picture and its microphone are
+(rig_config.X4_PICTURE_DELAY_S minus X4_AUDIO_DELAY_S: the picture is later,
+so the sound is moved later) so sound and picture line up.
 
     .venv/bin/python add_sound_map_to_video.py recordings/live_20260928_153408
     -> recordings/live_20260928_153408_video_soundmap.mp4   (the original is untouched)
@@ -181,15 +182,19 @@ def main():
     comp = AVF.AVMutableComposition.composition()
     dur = CM.CMTimeMinimum(va.duration(), oa.duration())
     rng = CM.CMTimeRangeMake(CM.kCMTimeZero, dur)
-    d = CM.CMTimeMakeWithSeconds(max(shift, 0.0), 600)
+    d = CM.CMTimeMakeWithSeconds(abs(shift), 600)
     tv = comp.addMutableTrackWithMediaType_preferredTrackID_(AVF.AVMediaTypeVideo, 0)
     tv.insertTimeRange_ofTrack_atTime_error_(rng, va.tracksWithMediaType_(AVF.AVMediaTypeVideo)[0],
                                              CM.kCMTimeZero, None)
     aud = oa.tracksWithMediaType_(AVF.AVMediaTypeAudio)
-    if aud:                              # the sound moved `shift` earlier, to line up with the picture
+    if aud:          # the sound moved `shift` earlier (later if negative), to line up with the picture
         ta = comp.addMutableTrackWithMediaType_preferredTrackID_(AVF.AVMediaTypeAudio, 0)
-        ta.insertTimeRange_ofTrack_atTime_error_(
-            CM.CMTimeRangeMake(d, CM.CMTimeSubtract(oa.duration(), d)), aud[0], CM.kCMTimeZero, None)
+        if shift >= 0:
+            ta.insertTimeRange_ofTrack_atTime_error_(
+                CM.CMTimeRangeMake(d, CM.CMTimeSubtract(oa.duration(), d)), aud[0], CM.kCMTimeZero, None)
+        else:
+            ta.insertTimeRange_ofTrack_atTime_error_(
+                CM.CMTimeRangeMake(CM.kCMTimeZero, CM.CMTimeSubtract(dur, d)), aud[0], d, None)
     if os.path.exists(out_path):
         os.remove(out_path)
     ex = AVF.AVAssetExportSession.alloc().initWithAsset_presetName_(comp, AVF.AVAssetExportPresetHighestQuality)
