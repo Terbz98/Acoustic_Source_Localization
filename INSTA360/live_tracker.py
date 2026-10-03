@@ -42,6 +42,7 @@ from doa_core import (ArrayConfig, Framer, LiveGate, MapAccumulator, SrpArray,
                       ambi_to_acn_n3d, frame_weights_and_norm, profile_peaks,
                       wrap180, zoom_config, zylia_config)
 from fusion import Triangulator, rig_layout
+from sound_map import MapAccumulator2D, camera_values, paint
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -152,6 +153,7 @@ class ArrayTracker:
         self.gate = LiveGate(self.frame_rate, RC.ENERGY_GATE_DB, RC.SNR_GATE_DB, history_s=20.0)
         self.acc = MapAccumulator(self.srp.az_deg.size, self.srp.el_deg.size,
                                   self.frame_rate, tau_s)
+        self.map2d = MapAccumulator2D(self.srp.shape, self.frame_rate, tau_s)   # for the 360 strip
         self.level_db = -120.0
         self.n_clip = 0
         self.n_active = 0
@@ -194,14 +196,17 @@ class ArrayTracker:
         idx = np.flatnonzero(active)
         f0 = self.acc.frame
         if idx.size:
-            pAz, pEl, w = frame_weights_and_norm(self.srp.maps(F[idx]))
+            P = self.srp.maps(F[idx])
+            pAz, pEl, w = frame_weights_and_norm(P)
             self.acc.step(T, pAz, pEl, w)
+            self.map2d.step(T, P, w)
             self.n_active += idx.size
             # remembered briefly so each separate sound can be analysed on its own
             t = (f0 + idx + 0.5) / self.frame_rate
             self.recent.extend(zip(t, pAz, pEl, w))
         else:
             self.acc.step(T)
+            self.map2d.step(T)
 
     def snapshot(self, hold_s, min_evidence=0.0):
         pAz, pEl = self.acc.profiles()
@@ -215,6 +220,7 @@ class ArrayTracker:
         return dict(az=az, el=el, pAz=pAz, pEl=pEl, fresh=bool(fresh),
                     evidence=float(self.acc.wsum),
                     level_db=float(self.level_db), snr_db=float(self.gate.snr_db),
+                    map2d=self.map2d.map(), map2d_w=float(self.map2d.wsum),
                     n_active=self.n_active, n_clip=self.n_clip)
 
     def clear(self):
@@ -621,7 +627,11 @@ def add_sound_to_video(rec):
     else:
         m = x[:, :19].mean(1)
         mix = np.stack([m, m], 1)
-    lag = int(round((rec.t_start[tag] - vt0) * fs))   # audio start relative to video start
+    # audio start relative to video start, moved so a sound is heard when the
+    # picture shows it: the picture is X4_PICTURE_DELAY_S late, and the X4's
+    # own microphone X4_AUDIO_DELAY_S late (the Zylia and Zoom are not)
+    late = getattr(RC, 'X4_AUDIO_DELAY_S', 0.0) if tag == 'x4' else 0.0
+    lag = int(round((rec.t_start[tag] - vt0 - late + getattr(RC, 'X4_PICTURE_DELAY_S', 0.0)) * fs))
     mix = mix[-lag:] if lag < 0 else np.vstack([np.zeros((lag, 2), np.float32), mix])
     peak = float(np.max(np.abs(mix))) if len(mix) else 0.0
     if peak > 0:
@@ -882,7 +892,6 @@ def draw_info(st, w, h, view_line, cam_status):
 def gui_loop(tracker, cam, reframer, args):
     import cv2
     global K
-    from camera_view import panorama_xy
     K = screen_scale()
     win = 'Sound tracker'
     # WINDOW_NORMAL + resizeWindow: the K-times-larger image is shown in a
@@ -942,12 +951,15 @@ def gui_loop(tracker, cam, reframer, args):
                 pano = cv2.flip(pano, 1)
             top = (pw // 2 - Hb * K) // 2
             pano = np.ascontiguousarray(pano[top:top + Hb * K])
-            px, py = panorama_xy(laz, lel, pw, pw // 2, yaw_now)
-            cv2.circle(pano, (px, py - top), 14 * K, GREEN, 2 * K, cv2.LINE_AA)
-            if st and st['cam_az'] is not None:
-                qx, qy = panorama_xy(st['cam_az'], st['cam_el'], pw, pw // 2, yaw_now)
-                cv2.drawMarker(pano, (qx, qy - top), RED, cv2.MARKER_TILTED_CROSS, 16 * K, 2 * K,
-                               cv2.LINE_AA)
+            # where sound is coming from, as a heat map over the 360 strip
+            # (the Zylia's az x el map, redrawn as the camera sees it)
+            zs = st.get('zylia') if st else None
+            if zs is not None and st.get('src') is not None:
+                vals = camera_values(zs['map2d'], tracker.zyl.srp.az_deg, tracker.zyl.srp.el_deg,
+                                     tracker.posA, RC.YAW_ZYLIA_DEG, st['src'], tracker.cam_pos,
+                                     220, 75, yaw_now + 180.0, 360.0 / 220,
+                                     90.0 - top / (pw // 2) * 180.0, mirror)
+                paint(pano, vals, zs['map2d_w'] / max(RC.MIN_EVIDENCE, 1e-3))
             fov = reframer.hfov
         else:
             view = np.full((H * K, Wv * K, 3), 18, np.uint8)
