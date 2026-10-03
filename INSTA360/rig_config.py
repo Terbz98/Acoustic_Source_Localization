@@ -75,12 +75,12 @@ CAMERA_UPSIDE_DOWN = False
 # images side by side instead, use 'dualfisheye'.
 CAMERA_PROJECTION = 'equirect'
 
-# How late the X4's two streams are compared with real time (measured on the
-# 28 Sep recording against the Zylia, which has almost no delay). Its
-# microphone is 0.49 s behind on every stomp; its picture about 0.1 s. The
-# recorded window video moves its sound by the difference so they line up,
-# and the sound-map video draws the map as of the moment the picture shows.
-X4_PICTURE_DELAY_S = 0.10
+# How late the X4's two streams are compared with real time. Its microphone
+# is 0.49 s behind the Zylia on every stomp (measured, 28 Sep recording). Its
+# picture delay was set by watching: the sound is moved earlier by the
+# difference (0.15 s), which looked right. If speech looks late or early in a
+# recorded video, nudge X4_PICTURE_DELAY_S by 0.05 and remake it.
+X4_PICTURE_DELAY_S = 0.34
 X4_AUDIO_DELAY_S = 0.49
 CAMERA_NAME = 'Insta360'      # opened by name (part of it) through AVFoundation
 CAMERA_INDEX = None           # set a number ONLY to force OpenCV capture by index
