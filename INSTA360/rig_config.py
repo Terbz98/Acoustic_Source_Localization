@@ -78,9 +78,9 @@ CAMERA_PROJECTION = 'equirect'
 # How late the X4's two streams are compared with real time. Its microphone
 # is 0.49 s behind the Zylia on every stomp (measured, 28 Sep recording). Its
 # picture delay was set by watching: the sound is moved earlier by the
-# difference (0.07 s: 0 looked late, 0.15 looked early). If speech looks late or early in a
+# difference (0.04 s: 0 looked late, 0.07 and 0.15 looked early). If speech looks late or early in a
 # recorded video, nudge X4_PICTURE_DELAY_S by 0.05 and remake it.
-X4_PICTURE_DELAY_S = 0.42
+X4_PICTURE_DELAY_S = 0.45
 X4_AUDIO_DELAY_S = 0.49
 CAMERA_NAME = 'Insta360'      # opened by name (part of it) through AVFoundation
 CAMERA_INDEX = None           # set a number ONLY to force OpenCV capture by index
