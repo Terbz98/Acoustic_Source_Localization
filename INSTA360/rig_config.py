@@ -37,8 +37,9 @@ USE_ZOOM = True
 # 'FB' one behind the other, Zylia in front.   'BF' Zoom in front.
 LAYOUT = 'LR'
 
-# TAPE-MEASURE IT. Distance scales linearly with it.
-BASELINE_M = 1.00
+# TAPE-MEASURE IT. Distance scales linearly with it. 1.60 m in the outdoor
+# sessions of 6 Oct 2026 (Zylia and Zoom each 0.8 m from the camera).
+BASELINE_M = 1.60
 
 # How far each mic's own zero is rotated from the rig's +x: a mic reads
 # (true bearing + yaw). Only YAW_ZOOM - YAW_ZYLIA matters for distance, and it

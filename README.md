@@ -16,10 +16,10 @@ Top left: the view cut out of the X4's 360° picture. Top right: the two mics' d
 
 <br><br>
 
-<img src="docs/bus.gif" width="480" alt="Live tracker outdoors: the camera view turns to a bus as it approaches and follows it as it drives past; the glow on the 360° strip moves with the bus">
+<img src="docs/bus.gif" width="720" alt="Live tracker outdoors: the camera view follows a minibus as it drives past, with the top-view radar (mics 1.6 m apart), the glowing 360° strip and the list of sounds">
 
-<sub>Live, outdoors by a road: the view turns to a bus and follows it as it drives past.<br>
-Top: the camera view. Bottom: the whole 360° picture, glowing where the sound comes from (two bystanders blurred).</sub>
+<sub>Live, outdoors by a road: the view follows a minibus as it drives past (mics 1.6 m apart, azimuth 0–360°).<br>
+Same layout as above; the glow on the 360° strip is where the sound comes from (one bystander blurred).</sub>
 
 </div>
 
