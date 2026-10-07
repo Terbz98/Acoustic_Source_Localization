@@ -40,7 +40,7 @@ import soundfile as sf
 
 import rig_config as RC
 from doa_core import (Framer, LiveGate, MapAccumulator, SrpArray, frame_weights_and_norm,
-                      profile_peaks, wrap180, zoom_config, zylia_config)
+                      profile_peaks, az360, wrap180, zoom_config, zylia_config)
 from fusion import Triangulator, rig_layout
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -240,16 +240,16 @@ def fig_per_frame(plt, A, B, dist_t, dist_r, res, truth, label):
         if D is None:
             continue
         a = D['active']
-        ax[0].scatter(D['t'][a], wrap180(D['az_f'][a] - D['yaw']), s=ms, c=c, lw=0, alpha=0.75, label=name)
+        ax[0].scatter(D['t'][a], (D['az_f'][a] - D['yaw']) % 360, s=ms, c=c, lw=0, alpha=0.75, label=name)
         ax[1].scatter(D['t'][a], D['el_f'][a], s=ms, c=c, lw=0, alpha=0.75, label=name)
     if truth is not None:
-        ax[0].axhline(truth['azA'], color=ZYLIA_C, ls='--', lw=1.2)
-        ax[0].axhline(truth['azB'], color=ZOOM_C, ls='--', lw=1.2)
+        ax[0].axhline(truth['azA'] % 360, color=ZYLIA_C, ls='--', lw=1.2)
+        ax[0].axhline(truth['azB'] % 360, color=ZOOM_C, ls='--', lw=1.2)
         ax[1].axhline(truth['el'], color=INK2, ls='--', lw=1.2)
-    ax[0].set_ylim(-190, 190)
-    ax[0].set_yticks([-180, -90, 0, 90, 180])
-    ax[0].set_yticklabels(['behind', 'right −90°', 'front 0°', 'left +90°', 'behind'])
-    ax[0].set_ylabel('left–right', color=INK2)
+    ax[0].set_ylim(-10, 370)
+    ax[0].set_yticks([0, 90, 180, 270, 360])
+    ax[0].set_yticklabels(['front 0°', 'left 90°', 'behind 180°', 'right 270°', 'front 360°'])
+    ax[0].set_ylabel('azimuth', color=INK2)
     ax[0].legend(loc='upper right', markerscale=2.2 if long else 1.2, fontsize=10.5, ncol=2,
                  frameon=True, facecolor='white', edgecolor='none', framealpha=1)
     ax[1].set_ylabel('up–down (°)', color=INK2)
@@ -289,7 +289,7 @@ def fig_polar(plt, A, B, truth, label):
             continue
         th = np.radians(np.r_[D['az_deg'], D['az_deg'][:1]] - D['yaw'])     # into the rig frame
         ax.plot(th, np.r_[D['pAz'], D['pAz'][:1]], color=c, lw=2,
-                label=f"{name}: peak {float(wrap180(D['az'] - D['yaw'])):+.1f}°")
+                label=f"{name}: peak {az360(D['az'] - D['yaw']):.1f}°")
     if truth is not None:
         for g, c in ((truth['azA'], ZYLIA_C), (truth['azB'], ZOOM_C)):
             ax.plot([np.radians(g)] * 2, [0, 1.05], color=c, ls='--', lw=1.2)
@@ -297,7 +297,7 @@ def fig_polar(plt, A, B, truth, label):
     ax.set_rticks([0.25, 0.5, 0.75, 1.0])
     ax.set_yticklabels([])
     ax.set_thetagrids([0, 45, 90, 135, 180, 225, 270, 315],
-                      ['front', '+45°', 'left', '+135°', 'behind', '−135°', 'right', '−45°'], color=INK2)
+                      ['front 0°', '45°', 'left 90°', '135°', 'behind 180°', '225°', 'right 270°', '315°'], color=INK2)
     ax.grid(color=GRID)
     ax.spines['polar'].set_color(AXIS)
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.06), frameon=False, ncol=2, fontsize=10.5)
@@ -357,7 +357,7 @@ def main():
     ap.add_argument('--from', dest='t_from', type=float, help='start, seconds into the recording')
     ap.add_argument('--to', dest='t_to', type=float, help='end, seconds into the recording')
     ap.add_argument('--truth', nargs=3, type=float, metavar=('AZ', 'EL', 'R'),
-                    help='where the sound really was: az, el (deg) and distance (m) from the midpoint')
+                    help='where the sound really was: az (0-360, 90 = left, 270 = right; -90 also works), el (deg) and distance (m) from the midpoint')
     ap.add_argument('--layout', default=RC.LAYOUT, help=f'rig layout (default {RC.LAYOUT}, rig_config.py)')
     ap.add_argument('--baseline', type=float, default=RC.BASELINE_M, help='metres between the mics')
     ap.add_argument('--yaw-zylia', type=float, default=RC.YAW_ZYLIA_DEG)
@@ -390,7 +390,7 @@ def main():
     t0, t1, what = start, end, 'whole recording'
     if args.sound is not None:
         t0, t1, row = sound_window(args.sound, sync, args.log)
-        what = (f"sound #{args.sound} at {row['clock']}: the tracker said az {float(row['azimuth_deg']):+.1f}°, "
+        what = (f"sound #{args.sound} at {row['clock']}: the tracker said az {az360(float(row['azimuth_deg'])):.1f}°, "
                 f"el {float(row['elevation_deg']):+.1f}°, "
                 + (f"{float(row['distance_m']):.2f} m" if row['distance_m'] else 'no distance'))
     if args.t_from is not None or args.t_to is not None:
@@ -457,13 +457,13 @@ def main():
 
     print('\n=============== SOURCE, from the midpoint of the two mics ===============')
     rs = f"{res['r']:.2f} m" if res['trusted'] else f"--  ({res['warning']})"
-    print(f"Estimate : az {res['az']:+7.1f} deg | el {res['el']:+6.1f} deg | r {rs}")
+    print(f"Estimate : az {az360(res['az']):6.1f} deg | el {res['el']:+6.1f} deg | r {rs}")
     if truth is not None:
-        print(f"Truth    : az {truth['az']:+7.1f} deg | el {truth['el']:+6.1f} deg | r {truth['r']:.2f} m")
+        print(f"Truth    : az {az360(truth['az']):6.1f} deg | el {truth['el']:+6.1f} deg | r {truth['r']:.2f} m")
         print(f"Error    : az {float(wrap180(res['az'] - truth['az'])):+7.1f} deg | "
               f"el {res['el'] - truth['el']:+6.1f} deg | r {res['r'] - truth['r']:+.2f} m")
-    print(f"Per mic  : Zylia {float(wrap180(A['az'] - A['yaw'])):+.1f} deg (el {A['el']:+.1f})"
-          + (f", Zoom {float(wrap180(B['az'] - B['yaw'])):+.1f} deg" if B is not None else ''))
+    print(f"Per mic  : Zylia {az360(A['az'] - A['yaw']):.1f} deg (el {A['el']:+.1f})"
+          + (f", Zoom {az360(B['az'] - B['yaw']):.1f} deg" if B is not None else ''))
     if dist_r.size:
         print(f'Per frame: {dist_r.size} crossings, median distance {np.median(dist_r):.2f} m')
 

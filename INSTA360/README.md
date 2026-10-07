@@ -75,12 +75,14 @@ separate sound gets one line:
 ```
 Listening. Every sound (clap, word, knock...) gets one line below:
 
-[22:30:52] SOUND #2   az  -20.3   el  +0.7   dist 1.44 m   (1.50 s)
-[22:30:54] SOUND #3   az  -18.1   el  +0.9   dist 1.45 m   (1.16 s)
+[22:30:52] SOUND #2   az 339.7   el  +0.7   dist 1.44 m   (1.50 s)
+[22:30:54] SOUND #3   az 341.9   el  +0.9   dist 1.45 m   (1.16 s)
 ```
 
-**az** = degrees left (+) / right (−) of straight ahead · **el** = degrees up
-(+) / down (−) · **dist** = metres from the midpoint of the two mics.
+**az** = 0–360°, turning left from straight ahead (0 = front, 90 = left,
+180 = behind, 270 = right) · **el** = degrees up (+) / down (−) · **dist** =
+metres from the midpoint of the two mics. The same 0–360 numbers are used in
+the window, the sounds CSV, the picture file names and the analysis figures.
 
 ### Options
 

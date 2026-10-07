@@ -39,7 +39,7 @@ import numpy as np
 
 import rig_config as RC
 from doa_core import (ArrayConfig, Framer, LiveGate, MapAccumulator, SrpArray,
-                      ambi_to_acn_n3d, frame_weights_and_norm, profile_peaks,
+                      ambi_to_acn_n3d, az360, frame_weights_and_norm, profile_peaks,
                       wrap180, zoom_config, zylia_config)
 from fusion import Triangulator, rig_layout
 from sound_map import MapAccumulator2D, camera_values, paint
@@ -376,11 +376,11 @@ class Tracker:
         zs, os_ = st['zylia'], st['zoom']
         if st['fresh']:
             r = f"r {st['r']:.2f} m" if st['r'] is not None else 'r   --  '
-            line = (f"[{st['t']:7.1f}s] az {st['az']:+7.1f}  el {st['el']:+5.1f}  {r}  "
-                    f"| Zylia {zs['az']:+7.1f}/{zs['el']:+5.1f}")
+            line = (f"[{st['t']:7.1f}s] az {az360(st['az']):5.1f}  el {st['el']:+5.1f}  {r}  "
+                    f"| Zylia {az360(zs['az']):5.1f}/{zs['el']:+5.1f}")
             if os_ is not None:
-                line += f"  Zoom {os_['az']:+7.1f}" if os_['fresh'] else '  Zoom  (quiet)'
-            line += f"  | cam {st['cam_az']:+6.1f}/{st['cam_el']:+5.1f}  {st['mode']}"
+                line += f"  Zoom {az360(os_['az']):5.1f}" if os_['fresh'] else '  Zoom  (quiet)'
+            line += f"  | cam {az360(st['cam_az']):5.1f}/{st['cam_el']:+5.1f}  {st['mode']}"
         else:
             line = (f"[{st['t']:7.1f}s] listening...  Zylia {zs['level_db']:5.0f} dBFS"
                     + (f"  Zoom {os_['level_db']:5.0f} dBFS" if os_ is not None else ''))
@@ -464,17 +464,17 @@ class SoundEvents:
         self._print(ev)
         if self._w is not None:
             self._w.writerow([ev['n'], ev['clock'], f"{t0:.2f}", f"{ev['dur']:.2f}",
-                              f"{ev['az']:.1f}", f"{ev['el']:.1f}",
+                              f"{az360(ev['az']):.1f}", f"{ev['el']:.1f}",
                               '' if ev['r'] is None else f"{ev['r']:.2f}",
-                              ev['mode'], f"{azZ:.1f}", f"{elZ:.1f}",
-                              '' if azO is None else f"{azO:.1f}", z[3], f"{z[2]:.1f}"])
+                              ev['mode'], f"{az360(azZ):.1f}", f"{elZ:.1f}",
+                              '' if azO is None else f"{az360(azO):.1f}", z[3], f"{z[2]:.1f}"])
             self._f.flush()
         return ev
 
     @staticmethod
     def line(ev):
         r = f"{ev['r']:.2f} m" if ev['r'] is not None else '  --  '
-        return (f"#{ev['n']:<3d} az {ev['az']:+6.1f}   el {ev['el']:+5.1f}   dist {r}")
+        return (f"#{ev['n']:<3d} az {az360(ev['az']):5.1f}   el {ev['el']:+5.1f}   dist {r}")
 
     def _print(self, ev):
         why = ''
@@ -678,7 +678,7 @@ def save_sound_pictures(folder, ev, frame, view, canvas):
     import cv2
     os.makedirs(folder, exist_ok=True)
     r = 'nodist' if ev['r'] is None else f"{ev['r']:.2f}m"
-    base = os.path.join(folder, f"sound_{ev['n']:03d}_az{ev['az']:+.0f}_el{ev['el']:+.0f}_{r}")
+    base = os.path.join(folder, f"sound_{ev['n']:03d}_az{az360(ev['az'], 0):03.0f}_el{ev['el']:+.0f}_{r}")
     if frame is not None:
         cv2.imwrite(base + '_360.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 92])
     if view is not None:
@@ -858,7 +858,7 @@ def draw_info(st, w, h, view_line, cam_status):
 
     if st and st['fresh']:
         r = f"{st['r']:.2f} m" if st['r'] is not None else '--'
-        put(f"SOUND   az {st['az']:+.1f}   el {st['el']:+.1f}   dist {r}", GREEN, 0.55, 24)
+        put(f"SOUND   az {az360(st['az']):.1f}   el {st['el']:+.1f}   dist {r}", GREEN, 0.55, 24)
         put(short_mode(st['mode'], st['fusion']), GREY)
     else:
         put('listening...', GREY, 0.55, 24)
@@ -977,7 +977,7 @@ def gui_loop(tracker, cam, reframer, args):
             text(view, 'X4: ' + msg, (20, H // 2), GREY, 0.6)
             fov = reframer.hfov if reframer is not None else RC.VIEW_FOV_DEG
 
-        view_line = (f"view  az {round(laz) + 0:+d}  el {round(lel) + 0:+d}   zoom {fov:.0f} deg"
+        view_line = (f"view  az {az360(laz, 0):.0f}  el {round(lel) + 0:+d}   zoom {fov:.0f} deg"
                      f"{'   other side' if other_side else ''}{'   upside-down' if upside else ''}")
         cam_status = getattr(cam, 'status', 'connected') if cam is not None else 'off'
         info = draw_info(st, H, Hb, view_line, cam_status)
@@ -1059,8 +1059,8 @@ def replay_summary(hist, truth_az=None):
     print(f'\nREPLAY SUMMARY over {len(hist)} live updates '
           f'({len(r)} with a trusted distance):')
     print('             25%   median      75%')
-    a = [float(wrap180(v)) for v in q(azu)]
-    print(f'  az   {a[0]:+8.1f} {a[1]:+8.1f} {a[2]:+8.1f} deg')
+    a = [az360(v) for v in q(azu)]
+    print(f'  az   {a[0]:8.1f} {a[1]:8.1f} {a[2]:8.1f} deg')
     e = q(el)
     print(f'  el   {e[0]:+8.1f} {e[1]:+8.1f} {e[2]:+8.1f} deg')
     if len(r):
@@ -1157,7 +1157,8 @@ def main():
         log = None if args.no_log else os.path.join(HERE, 'logs', f'sounds_{stamp}.csv')
         tracker.sounds = SoundEvents(tracker, log)
         print('\nListening. Every sound (clap, word, knock...) gets one line below:'
-              '\n  az = left(+)/right(-) of straight ahead, el = up(+)/down(-), '
+              '\n  az = 0-360 deg turning left from straight ahead (90 left, 180 behind, 270 right), '
+              'el = up(+)/down(-), '
               'dist = distance from the middle of the two mics.'
               + (f'\n  Also saved to {log}' if log else '') + '\n', flush=True)
 

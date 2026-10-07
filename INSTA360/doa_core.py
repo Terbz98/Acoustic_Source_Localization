@@ -378,6 +378,13 @@ def wrap180(x):
     return (np.asarray(x) + 180) % 360 - 180
 
 
+def az360(x, nd=1):
+    """An azimuth as shown to people: 0-360 deg, counter-clockwise from
+    straight ahead (90 = left, 180 = behind, 270 = right). Rounded to nd
+    decimals first, so -0.04 reads 0.0 and not 360.0."""
+    return round(float(x), nd) % 360.0 + 0.0
+
+
 # ===================== streaming pieces ===================================
 class Framer:
     """Collects arbitrary-length chunks and hands back whole overlapping

@@ -119,4 +119,4 @@ FALLBACK_DISTANCE_M = 2.0
 # Gates of az_power_map.m: a frame must be within ENERGY_GATE_DB of the loud
 # level AND at least SNR_GATE_DB over the room's noise floor.
 ENERGY_GATE_DB = -25
-SNR_GATE_DB = 10
+SNR_GATE_DB = 0

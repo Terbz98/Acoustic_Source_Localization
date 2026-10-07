@@ -14,6 +14,13 @@
 <sub>Live, in a sound-proof room: the camera view turns to whoever is talking.<br>
 Top left: the view cut out of the X4's 360° picture. Top right: the two mics' directions crossing at the sound. Bottom: the whole room and one line per sound.</sub>
 
+<br><br>
+
+<img src="docs/bus.gif" width="480" alt="Live tracker outdoors: the camera view turns to a bus as it approaches and follows it as it drives past; the glow on the 360° strip moves with the bus">
+
+<sub>Live, outdoors by a road: the view turns to a bus and follows it as it drives past.<br>
+Top: the camera view. Bottom: the whole 360° picture, glowing where the sound comes from (two bystanders blurred).</sub>
+
 </div>
 
 ---
