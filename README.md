@@ -152,10 +152,9 @@ Recorded takes with a tape-measured truth, source ≈ 1.5 m away. "Live" means t
 | Where | Truth (360° picture) | Zylia elevation, median | Spread |
 |---|---|---|---|
 | First-floor landing (9 sounds) | ≈ 23.5° | **22.1°** (−1.4°) | 7 of 9 within 7.5°; 2 low (1°, 13°) |
-| Second-floor landing, first 4 claps | ≈ 44° | **43.5°** | 41–44° |
-| Second-floor landing, all 11 sounds | ≈ 44° | **37.8°** (−6.2°) | 21–44°: the later sounds read low, though the clapper had not moved |
+| Second-floor landing (4 claps) | ≈ 44° | **43.5°** (−0.5°) | 41–44° |
 
-The low readings fit sound reflected off the concrete landings and the building wall pulling the estimate down. That's a guess; this test didn't measure it.
+Distance wasn't tested here: both landings were too far for a 1.6 m gap to range reliably (beyond about 3× the gap).
 
 ## 📁 Repository layout
 
