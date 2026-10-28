@@ -145,6 +145,18 @@ Recorded takes with a tape-measured truth, source ≈ 1.5 m away. "Live" means t
 | Distance of a voice 1.3–1.8 m away | typically 0.15 m off (6 checks, from 0.3 m short to 0.6 m far) |
 | Stomps and steps on the floor | direction right, distance 0.2–1 m too far (5 checks) |
 
+### Live elevation test outdoors
+
+26 October 2026: claps from the first- and second-floor landings of an outdoor stairway, roughly straight ahead of the rig (mics 1.6 m apart). The truth is where the clapper's chest is in the X4's 360° picture saved with each sound (one pixel row = one elevation).
+
+| Where | Truth (360° picture) | Zylia elevation, median | Spread |
+|---|---|---|---|
+| First-floor landing (9 sounds) | ≈ 23.5° | **22.1°** (−1.4°) | 7 of 9 within 7.5°; 2 low (1°, 13°) |
+| Second-floor landing, first 4 claps | ≈ 44° | **43.5°** | 41–44° |
+| Second-floor landing, all 11 sounds | ≈ 44° | **37.8°** (−6.2°) | 21–44°: the later sounds read low, though the clapper had not moved |
+
+The low readings fit sound reflected off the concrete landings and the building wall pulling the estimate down. That's a guess; this test didn't measure it.
+
 ## 📁 Repository layout
 
 ```
