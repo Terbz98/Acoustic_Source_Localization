@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
+  <title id="title">Measured results</title>
+  <desc id="desc">Azimuth error under 3 degrees on most recorded takes, worst 6.2. Distance within 3 to 6 percent at 1.5 metres with the arrays 1 metre apart. Live, the camera view lands about 1 degree from a talker's mouth. Elevation of claps 44 degrees up read within 0.5 degrees.</desc>
+
+  <rect width="1200" height="300" rx="20" fill="#0E1116"/>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="56" y="62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" letter-spacing="1.5" fill="#8B949E">MEASURED, NOT SIMULATED</text>
+
+    <line x1="320" y1="96" x2="320" y2="256" stroke="#232A33" stroke-width="1.5"/>
+    <line x1="592" y1="96" x2="592" y2="256" stroke="#232A33" stroke-width="1.5"/>
+    <line x1="864" y1="96" x2="864" y2="256" stroke="#232A33" stroke-width="1.5"/>
+
+    <g transform="translate(56 0)">
+      <line x1="0" y1="104" x2="28" y2="104" stroke="#3CD2FF" stroke-width="3"/>
+      <text x="0" y="164" font-size="52" font-weight="700" fill="#F2EFE9">&lt; 3°</text>
+      <text x="0" y="200" font-size="20" fill="#C9CED6">direction error on</text>
+      <text x="0" y="226" font-size="20" fill="#C9CED6">most recorded takes</text>
+      <text x="0" y="256" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#6E7681">worst 6.2° · tape-measured</text>
+    </g>
+
+    <g transform="translate(348 0)">
+      <line x1="0" y1="104" x2="28" y2="104" stroke="#FFAA00" stroke-width="3"/>
+      <text x="0" y="164" font-size="52" font-weight="700" fill="#F2EFE9">3–6 %</text>
+      <text x="0" y="200" font-size="20" fill="#C9CED6">distance error at 1.5 m,</text>
+      <text x="0" y="226" font-size="20" fill="#C9CED6">arrays 1 m apart</text>
+      <text x="0" y="256" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#6E7681">4 takes · tape-measured</text>
+    </g>
+
+    <g transform="translate(620 0)">
+      <line x1="0" y1="104" x2="28" y2="104" stroke="#3CD2FF" stroke-width="3"/>
+      <text x="0" y="164" font-size="52" font-weight="700" fill="#F2EFE9">≈ 1°</text>
+      <text x="0" y="200" font-size="20" fill="#C9CED6">live view centre to</text>
+      <text x="0" y="226" font-size="20" fill="#C9CED6">a talker's mouth</text>
+      <text x="0" y="256" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#6E7681">8 checks, all within 4°</text>
+    </g>
+
+    <g transform="translate(892 0)">
+      <line x1="0" y1="104" x2="28" y2="104" stroke="#FFAA00" stroke-width="3"/>
+      <text x="0" y="164" font-size="52" font-weight="700" fill="#F2EFE9">0.5°</text>
+      <text x="0" y="200" font-size="20" fill="#C9CED6">elevation error for</text>
+      <text x="0" y="226" font-size="20" fill="#C9CED6">claps 44° overhead</text>
+      <text x="0" y="256" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#6E7681">outdoor stairway · 4 claps</text>
+    </g>
+  </g>
+</svg>

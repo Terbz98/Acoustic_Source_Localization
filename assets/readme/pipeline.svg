@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="270" viewBox="0 0 1200 270" role="img" aria-labelledby="title desc">
+  <title id="title">How it works</title>
+  <desc id="desc">Four stages: capture with the Zylia's 19 capsules and the Zoom's 4 ambisonic channels; compute a map of sound power from every direction for each frame; multiply both arrays' maps over a grid of room positions to triangulate; steer the 360-degree view and log each sound's azimuth, elevation and distance.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5C6570"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="270" rx="20" fill="#0E1116"/>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="48" y="58" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" letter-spacing="1.5" fill="#8B949E">PIPELINE · EVERY ~10 MS</text>
+
+    <g transform="translate(48 88)">
+      <rect width="240" height="140" rx="14" fill="#141922" stroke="#232A33" stroke-width="1.5"/>
+      <text x="20" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#6E7681">01</text>
+      <text x="20" y="68" font-size="24" font-weight="700" fill="#F2EFE9">Capture</text>
+      <text x="20" y="100" font-size="20" fill="#FFAA00">Zylia: 19 capsules</text>
+      <text x="20" y="126" font-size="20" fill="#3CD2FF">Zoom: 4-ch AmbiX</text>
+    </g>
+
+    <g transform="translate(336 88)">
+      <rect width="240" height="140" rx="14" fill="#141922" stroke="#232A33" stroke-width="1.5"/>
+      <text x="20" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#6E7681">02</text>
+      <text x="20" y="68" font-size="24" font-weight="700" fill="#F2EFE9">Direction maps</text>
+      <text x="20" y="100" font-size="20" fill="#C9CED6">sound power from</text>
+      <text x="20" y="126" font-size="20" fill="#C9CED6">every direction</text>
+    </g>
+
+    <g transform="translate(624 88)">
+      <rect width="240" height="140" rx="14" fill="#141922" stroke="#232A33" stroke-width="1.5"/>
+      <text x="20" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#6E7681">03</text>
+      <text x="20" y="68" font-size="24" font-weight="700" fill="#F2EFE9">Triangulate</text>
+      <text x="20" y="100" font-size="20" fill="#C9CED6">multiply both maps</text>
+      <text x="20" y="126" font-size="20" fill="#C9CED6">over room positions</text>
+    </g>
+
+    <g transform="translate(912 88)">
+      <rect width="240" height="140" rx="14" fill="#141922" stroke="#F2EFE9" stroke-opacity="0.35" stroke-width="1.5"/>
+      <text x="20" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#6E7681">04</text>
+      <text x="20" y="68" font-size="24" font-weight="700" fill="#F2EFE9">Act</text>
+      <text x="20" y="100" font-size="20" fill="#C9CED6">steer the 360° view,</text>
+      <text x="20" y="126" font-size="20" fill="#C9CED6">log az · el · distance</text>
+    </g>
+
+    <line x1="292" y1="158" x2="330" y2="158" stroke="#5C6570" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="580" y1="158" x2="618" y2="158" stroke="#5C6570" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="868" y1="158" x2="906" y2="158" stroke="#5C6570" stroke-width="2" marker-end="url(#arrow)"/>
+  </g>
+</svg>
