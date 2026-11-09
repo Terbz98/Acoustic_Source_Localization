@@ -18,7 +18,7 @@ Two spherical microphone arrays each measure **which direction** a sound comes f
 </table>
 
 <p align="center">
-  <img src="assets/readme/results.svg" width="100%" alt="Measured results: direction error under 3° on most recorded takes (worst 6.2°); distance within 3–6% at 1.5 m with the arrays 1 m apart; live view centre about 1° from a talker's mouth; elevation within 0.5° for claps 44° overhead">
+  <img src="assets/readme/results.svg" width="100%" alt="Measured results: direction error under 3° on most recorded takes (worst 6.2°); distance within 2–4% at 1.5 m with the arrays 1 m apart; live view centre about 1° from a talker's mouth; elevation within 0.5° for claps 44° overhead">
 </p>
 
 ## Why two arrays
@@ -94,7 +94,7 @@ Source about 1.5 m away. "Live" means the recording was replayed through the rea
 | back clap | 180°, 1.50 m | +0.7° | **1.56 m** (+4%) | +0.9° | **1.58 m** |
 | in front of Zylia | −18.4°, 1.58 m | −0.7° | **1.52 m** (−4%) | +0.9° | **1.52 m** |
 | in front of Zoom | +18.4°, 1.58 m | −2.7° | **1.62 m** (+3%) | −2.8° | **1.66 m** |
-| centre, raised ~17° | 0°, 1.57 m | −0.7° | **1.66 m** (+6%) | −0.9° | **1.76 m** |
+| centre, raised ~17° | 0°, 1.70 m | −0.7° | **1.66 m** (−2%) | −0.9° | **1.76 m** |
 
 - **Azimuth is inside 6.2° on every take**, including the ones where distance failed.
 - **Elevation** reads +15.6° against about +16–17° measured three independent ways (Zylia only; see limitations).
@@ -122,6 +122,18 @@ Source about 1.5 m away. "Live" means the recording was replayed through the rea
 | Second-floor landing (4 claps) | ≈ 44° | **43.5°** (−0.5°) | 41–44° |
 
 Distance wasn't tested here: both landings were too far for a 1.6 m gap to range reliably (beyond about 3× the gap).
+
+### Live azimuth test outdoors: passing cars
+
+6 October 2026: cars and a minibus passing in two lanes in front of the rig (mics 1.6 m apart), 4.5 m and 7.25 m from the camera. The truth is each car's position in the X4 video together with its measured lane distance, compared with the Zylia's azimuth at the same moment.
+
+| Car position | 4.5 m lane (5 passes) | 7.25 m lane (4 passes) |
+|---|---|---|
+| 25–65° to the left | **8°** | **12°** |
+| Straight ahead (±12°) | **5°** | **2°** |
+| 25–65° to the right | **9°** | **2°** |
+
+Median azimuth error. 4 of 13 passes were left out because something louder covered the car: a car in the closer lane, a loud car hidden behind trees, or people talking by the rig. The audio and video clocks drifted by up to 2.4 s within these recordings, so each pass was lined up in time on its own. Distance wasn't usable for traffic: both lanes were beyond 3× the gap.
 
 ## Hardware
 
@@ -205,7 +217,7 @@ At 1.5 m, the only single-array cue for range is the curvature of the wavefront.
 
 <br>
 
-The distance information *is* the angle the two arrays disagree by: 36.9° at 1.5 m on a 1 m baseline. An unmeasured twist eats straight into it. A source at 1.50 m reads 1.75 m through a 5° twist, 2.09 m through 10°, and 2.59 m through 15°. Takes where the rotation was measured: −4, +3, +6, +4%. Where it wasn't: +60, +85, +109%. The Zoom also carries a standing offset of about +4.75° that no aiming removes.
+The distance information *is* the angle the two arrays disagree by: 36.9° at 1.5 m on a 1 m baseline. An unmeasured twist eats straight into it. A source at 1.50 m reads 1.75 m through a 5° twist, 2.09 m through 10°, and 2.59 m through 15°. Takes where the rotation was measured: −4, +3, −2, +4%. Where it wasn't: +60, +85, +109%. The Zoom also carries a standing offset of about +4.75° that no aiming removes.
 </details>
 
 <details>

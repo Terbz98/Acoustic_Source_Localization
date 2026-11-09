@@ -214,7 +214,7 @@ root). Replayed through the live tracker, source ≈ 1.5 m away:
 | back clap (180°, 1.50 m) | −179.1° | +0.0° | 1.58 m | 1.56 m |
 | in front of Zylia (−18.4°, 1.58 m) | −17.5° | +0.3° | 1.52 m | 1.52 m |
 | in front of Zoom (+18.4°, 1.58 m) | +15.6° | −0.9° | 1.66 m | 1.62 m |
-| centre, raised (0°, el ≈ +17°, 1.57 m) | −0.9° | +21.7° | 1.76 m | 1.66 m |
+| centre, raised (0°, el ≈ +17°, 1.70 m) | −0.9° | +21.7° | 1.76 m | 1.66 m |
 
 `validate_offline.py --sh` also runs the converted ambisonic files through a
 direct port of `run_doa.m` and reproduces the MATLAB numbers (e.g. the raised
