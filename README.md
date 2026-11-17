@@ -6,13 +6,17 @@ Two spherical microphone arrays each measure **which direction** a sound comes f
 
 <table>
   <tr>
-    <td width="50%" valign="top">
+    <td width="33%" valign="top">
       <img src="docs/demo.gif" width="100%" alt="Live tracker in a sound-proof room: the X4 view turns to the person talking, with the top-view radar, the 360° strip and the list of sounds">
-      <sub><b>Indoors, live.</b> The view turns to whoever is talking. Top right: the two arrays' bearings crossing at the voice.</sub>
+      <p><b>Indoors.</b> The view turns to whoever is talking; top right, the two arrays' bearings cross at the voice.</p>
     </td>
-    <td width="50%" valign="top">
+    <td width="33%" valign="top">
       <img src="docs/bus.gif" width="100%" alt="Live tracker outdoors: the camera view follows a minibus as it drives past, with the top-view radar (mics 1.6 m apart), the glowing 360° strip and the list of sounds">
-      <sub><b>Outdoors, live.</b> The view follows a minibus driving past; the 360° strip glows where the sound is. One bystander blurred.</sub>
+      <p><b>Road.</b> The view follows a minibus driving past; the 360° strip glows where the sound is.</p>
+    </td>
+    <td width="33%" valign="top">
+      <img src="docs/elevation.gif" width="100%" alt="Live tracker outdoors: claps from a second-floor stairway landing read about 42° up against about 44° true, and the view tilts up to the landing">
+      <p><b>Elevation.</b> Claps from a second-floor landing read 41–43° up, against about 44°. Bystanders blurred.</p>
     </td>
   </tr>
 </table>
