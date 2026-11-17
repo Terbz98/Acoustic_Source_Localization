@@ -15,7 +15,7 @@
 
     <g transform="translate(48 88)">
       <rect width="240" height="140" rx="14" fill="#141922" stroke="#232A33" stroke-width="1.5"/>
-      <text x="20" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#6E7681">01</text>
+      <text x="20" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#6E7681">01</text>
       <text x="20" y="68" font-size="24" font-weight="700" fill="#F2EFE9">Capture</text>
       <text x="20" y="100" font-size="20" fill="#FFAA00">Zylia: 19 capsules</text>
       <text x="20" y="126" font-size="20" fill="#3CD2FF">Zoom: 4-ch AmbiX</text>
@@ -23,7 +23,7 @@
 
     <g transform="translate(336 88)">
       <rect width="240" height="140" rx="14" fill="#141922" stroke="#232A33" stroke-width="1.5"/>
-      <text x="20" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#6E7681">02</text>
+      <text x="20" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#6E7681">02</text>
       <text x="20" y="68" font-size="24" font-weight="700" fill="#F2EFE9">Direction maps</text>
       <text x="20" y="100" font-size="20" fill="#C9CED6">sound power from</text>
       <text x="20" y="126" font-size="20" fill="#C9CED6">every direction</text>
@@ -31,7 +31,7 @@
 
     <g transform="translate(624 88)">
       <rect width="240" height="140" rx="14" fill="#141922" stroke="#232A33" stroke-width="1.5"/>
-      <text x="20" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#6E7681">03</text>
+      <text x="20" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#6E7681">03</text>
       <text x="20" y="68" font-size="24" font-weight="700" fill="#F2EFE9">Triangulate</text>
       <text x="20" y="100" font-size="20" fill="#C9CED6">multiply both maps</text>
       <text x="20" y="126" font-size="20" fill="#C9CED6">over room positions</text>
@@ -39,7 +39,7 @@
 
     <g transform="translate(912 88)">
       <rect width="240" height="140" rx="14" fill="#141922" stroke="#F2EFE9" stroke-opacity="0.35" stroke-width="1.5"/>
-      <text x="20" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#6E7681">04</text>
+      <text x="20" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#6E7681">04</text>
       <text x="20" y="68" font-size="24" font-weight="700" fill="#F2EFE9">Act</text>
       <text x="20" y="100" font-size="20" fill="#C9CED6">steer the 360° view,</text>
       <text x="20" y="126" font-size="20" fill="#C9CED6">log az · el · distance</text>

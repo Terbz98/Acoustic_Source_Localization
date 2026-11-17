@@ -36,3 +36,7 @@ __pycache__/
 INSTA360/recordings/
 INSTA360/logs/
 INSTA360/x4_frame.jpg
+
+# Local-only: README preview renders, and poster/report drafts with other groups' example PDFs
+README_preview*.png
+Poster and Report/

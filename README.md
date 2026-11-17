@@ -18,12 +18,12 @@ Two spherical microphone arrays each measure **which direction** a sound comes f
 </table>
 
 <p align="center">
-  <img src="assets/readme/results.svg" width="100%" alt="Measured results: direction error under 3° on most recorded takes (worst 6.2°); distance within 2–4% at 1.5 m with the arrays 1 m apart; live view centre about 1° from a talker's mouth; elevation within 0.5° for claps 44° overhead">
+  <img src="assets/readme/results.svg" width="100%" alt="Measured results: direction error under 3° and distance error 2–4% on tape-measured takes at 1.5 m (arrays 1 m apart); median direction error 2–12° for passing cars outdoors; elevation within 1.5° for claps 23° and 44° up an outdoor stairway">
 </p>
 
 ## Why two arrays
 
-A single microphone array can tell you direction, but not distance. At 1.5 m, the only range cue it has is the curvature of the arriving wavefront, about **0.5 mm** of extra path across an 11 cm sphere. Nine methods built on that cue all failed the same way: they returned the edge of their search grid on every take.
+A single microphone array can tell you direction, but not distance. At 1.5 m, the only range cue it has is the curvature of the arriving wavefront, about **1 mm** of extra path across an 11 cm sphere. Nine methods built on that cue all failed the same way: they returned the edge of their search grid on every take (3.00 m, and 10.0 m once the grid was widened to 10 m).
 
 A second array at a known distance turns range into geometry. With the arrays 1 m apart, a source 1.5 m away is seen **36.9° differently** by each one, and that disagreement *is* the distance. It also explains the project's biggest source of error: any unmeasured twist between the two arrays eats directly into those 36.9° (see [Key findings](#key-findings)).
 
@@ -102,15 +102,15 @@ Source about 1.5 m away. "Live" means the recording was replayed through the rea
 
 ### Live, in a sound-proof room
 
-28 September 2026: 3 min 15 s of talking, clapping, walking behind the rig and a phone playing bird song, 132 sounds located live, with the mics 1 m apart and the X4 in the middle. The truth comes from the X4 pictures the tracker saves for every sound: where the mouth or phone is in the picture (direction), and the person's height and feet in the 360° frame (distance). No tape measure, so read these as good estimates.
+28 September 2026: 3 min 15 s of talking, clapping, walking behind the rig and a phone playing bird song, with the mics 1 m apart and the X4 in the middle. The truth comes from the X4 pictures the tracker saves for every sound: where the mouth or phone is in the picture (direction), and the person's height and feet in the 360° frame (distance). No tape measure, so read these as good estimates.
 
 | Check | Result |
 |---|---|
-| Talking: view centre vs. the mouth | typically 1°, all 8 checks within 4° |
-| Phone held still | typically 5°, 6 of 7 within 6° (one 18° miss) |
+| Talking: view centre vs. the mouth | typically 1°, all within 4° |
+| Phone held still | typically 5°, mostly within 6° (one 18° miss) |
 | Phone swept around | typically 9° (the view trails a moving source) |
-| Distance of a voice 1.3–1.8 m away | typically 0.15 m off (6 checks, from 0.3 m short to 0.6 m far) |
-| Stomps and steps on the floor | direction right, distance 0.2–1 m too far (5 checks) |
+| Distance of a voice 1.3–1.8 m away | typically 0.15 m off (from 0.3 m short to 0.6 m far) |
+| Stomps and steps on the floor | direction right, distance 0.2–1 m too far |
 
 ### Live elevation test outdoors
 
@@ -118,8 +118,8 @@ Source about 1.5 m away. "Live" means the recording was replayed through the rea
 
 | Where | Truth (360° picture) | Zylia elevation, median | Spread |
 |---|---|---|---|
-| First-floor landing (9 sounds) | ≈ 23.5° | **22.1°** (−1.4°) | 7 of 9 within 7.5°; 2 low (1°, 13°) |
-| Second-floor landing (4 claps) | ≈ 44° | **43.5°** (−0.5°) | 41–44° |
+| First-floor landing | ≈ 23.5° | **22.1°** (−1.4°) | mostly within 7.5°; 2 low (1°, 13°) |
+| Second-floor landing (first claps) | ≈ 44° | **43.4°** (−0.6°) | 41–44° |
 
 Distance wasn't tested here: both landings were too far for a 1.6 m gap to range reliably (beyond about 3× the gap).
 
@@ -127,13 +127,13 @@ Distance wasn't tested here: both landings were too far for a 1.6 m gap to range
 
 6 October 2026: cars and a minibus passing in two lanes in front of the rig (mics 1.6 m apart), 4.5 m and 7.25 m from the camera. The truth is each car's position in the X4 video together with its measured lane distance, compared with the Zylia's azimuth at the same moment.
 
-| Car position | 4.5 m lane (5 passes) | 7.25 m lane (4 passes) |
+| Car position | 4.5 m lane | 7.25 m lane |
 |---|---|---|
 | 25–65° to the left | **8°** | **12°** |
 | Straight ahead (±12°) | **5°** | **2°** |
 | 25–65° to the right | **9°** | **2°** |
 
-Median azimuth error. 4 of 13 passes were left out because something louder covered the car: a car in the closer lane, a loud car hidden behind trees, or people talking by the rig. The audio and video clocks drifted by up to 2.4 s within these recordings, so each pass was lined up in time on its own. Distance wasn't usable for traffic: both lanes were beyond 3× the gap.
+Median azimuth error. Passes were left out when something louder covered the car: a car in the closer lane, a loud car hidden behind trees, or people talking by the rig. The audio and video clocks drifted by up to 2.4 s within these recordings, so each pass was lined up in time on its own. Distance wasn't usable for traffic: both lanes were beyond 3× the gap.
 
 ## Hardware
 
@@ -203,14 +203,6 @@ Every rule exists because something went wrong without it.
 6. **Mark which mic is where** on the floor. Swapped layouts can't be told apart afterwards.
 
 ## Key findings
-
-<details>
-<summary><b>One array cannot measure distance.</b> Nine methods tried, nine failures.</summary>
-
-<br>
-
-At 1.5 m, the only single-array cue for range is the curvature of the wavefront. Across an 11 cm sphere that's about **0.5 mm** of extra path. Every curvature-based method returned the edge of its search grid: 3.00 m on every take, and 10.0 m when the grid was widened to 10 m. A quiet source nearby and a loud one far away produce nearly the same signal at one microphone. Breaking that tie needs an external reference, and **a second array at a known baseline** is the one that works.
-</details>
 
 <details>
 <summary><b>The relative rotation between the arrays is the dominant error.</b></summary>
