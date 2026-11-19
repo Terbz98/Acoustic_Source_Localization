@@ -22,7 +22,7 @@ Two spherical microphone arrays each measure **which direction** a sound comes f
 </table>
 
 <p align="center">
-  <img src="assets/readme/results.svg" width="100%" alt="Measured results: direction error under 3° and distance error 2–4% on tape-measured takes at 1.5 m (arrays 1 m apart); median direction error 2–12° for passing cars outdoors; elevation within 1.5° for claps 23° and 44° up an outdoor stairway">
+  <img src="assets/readme/results.svg" width="100%" alt="Measured results: direction error under 3° and distance error 2–4% on tape-measured takes at 1.5 m (arrays 1 m apart); median direction error 2–12° for passing cars outdoors; elevation within 1° for claps 22° and 44° up an outdoor stairway">
 </p>
 
 ## Why two arrays
@@ -122,7 +122,7 @@ Source about 1.5 m away. "Live" means the recording was replayed through the rea
 
 | Where | Truth (360° picture) | Zylia elevation, median | Spread |
 |---|---|---|---|
-| First-floor landing | ≈ 23.5° | **22.1°** (−1.4°) | mostly within 7.5°; 2 low (1°, 13°) |
+| First-floor landing | ≈ 22° | **22.1°** (+0.1°) | mostly within 7.5°; 2 low (1°, 13°) |
 | Second-floor landing (first claps) | ≈ 44° | **43.4°** (−0.6°) | 41–44° |
 
 Distance wasn't tested here: both landings were too far for a 1.6 m gap to range reliably (beyond about 3× the gap).
