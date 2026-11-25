@@ -25,6 +25,8 @@ Two spherical microphone arrays each measure **which direction** a sound comes f
   <img src="assets/readme/results.svg" width="100%" alt="Measured results: direction error under 3° and distance error 2–4% on tape-measured takes at 1.5 m (arrays 1 m apart); median direction error 2–12° for passing cars outdoors; elevation within 1° for claps 22° and 44° up an outdoor stairway">
 </p>
 
+**Project documents** (NTHU EE undergraduate project, group B712): [report](docs/report_B712.pdf) · [abstract](docs/abstract_B712.pdf) · [poster](docs/poster_B712.pdf)
+
 ## Why two arrays
 
 A single microphone array can tell you direction, but not distance. At 1.5 m, the only range cue it has is the curvature of the arriving wavefront, about **1 mm** of extra path across an 11 cm sphere. Nine methods built on that cue all failed the same way: they returned the edge of their search grid on every take (3.00 m, and 10.0 m once the grid was widened to 10 m).
@@ -37,7 +39,7 @@ A second array at a known distance turns range into geometry. With the arrays 1 
   <img src="assets/readme/pipeline.svg" width="100%" alt="How it works: capture with the Zylia's 19 capsules and the Zoom's 4 ambisonic channels; compute a map of sound power from every direction; multiply both maps over a grid of room positions; steer the 360° view and log each sound">
 </p>
 
-1. **Direction, per array.** Every ~10 ms frame, a *steered-response power* (SRP) map is computed over all directions: how much sound arrives from each one. The Zylia ZM-1 uses the exact rigid-sphere model of its 19 capsules; the Zoom H3-VR uses 1st-order spherical harmonics. Quiet, clipped and reverberant frames are gated out or down-weighted.
+1. **Direction, per array.** For every 21 ms frame (a new one every ~10 ms), a *steered-response power* (SRP) map is computed over all directions: how much sound arrives from each one. The Zylia ZM-1 uses the exact rigid-sphere model of its 19 capsules; the Zoom H3-VR uses 1st-order spherical harmonics. Quiet, clipped and reverberant frames are gated out or down-weighted.
 2. **Distance, from two viewpoints.** Each array's whole azimuth map, not just its peak, is laid over a grid of candidate positions in the room, and the two are multiplied. The peak of the product is the source. A slightly-off frame widens the ridge instead of moving the answer.
 3. **Camera.** The X4 can't turn, and doesn't need to: it already sees 360°. The program cuts a normal perspective view out of the panorama, centred on the sound, like Insta360's "reframe" but live. Every sound is also logged (azimuth, elevation, distance) on screen, in the terminal and in a CSV file, with a picture from the camera.
 
@@ -167,7 +169,7 @@ Acoustic_Source_Localization/
 │   └── investigations/          one-off studies behind the method
 │
 ├── assets/readme/     README graphics (SVG)
-├── docs/              demo GIFs
+├── docs/              demo GIFs; project report, abstract and poster (PDF)
 ├── tools/             usb-speed-check.ps1 (Windows: check the Zylia's USB link)
 └── data/              your recordings go here (not in git)
 ```
