@@ -25,6 +25,10 @@ Two spherical microphone arrays each measure **which direction** a sound comes f
   <img src="assets/readme/results.svg" width="100%" alt="Measured results: direction error under 3° and distance error 2–4% on tape-measured takes at 1.5 m (arrays 1 m apart); median direction error 2–12° for passing cars outdoors; elevation within 1° for claps 22° and 44° up an outdoor stairway">
 </p>
 
+<p align="center">
+  <a href="docs/poster_B712.pdf"><img src="docs/poster_B712.png" width="600" alt="Exhibition poster, group B712: Real-Time 3D Sound Source Localization Using Two Spherical Microphone Arrays and a 360° Camera, with the method, the three test environments and their results"></a>
+</p>
+
 **Project documents** (NTHU EE undergraduate project, group B712): [report](docs/report_B712.pdf) · [abstract](docs/abstract_B712.pdf) · [poster](docs/poster_B712.pdf)
 
 ## Why two arrays
@@ -169,7 +173,7 @@ Acoustic_Source_Localization/
 │   └── investigations/          one-off studies behind the method
 │
 ├── assets/readme/     README graphics (SVG)
-├── docs/              demo GIFs; project report, abstract and poster (PDF)
+├── docs/              demo GIFs; project report, abstract and poster (PDF, poster also PNG)
 ├── tools/             usb-speed-check.ps1 (Windows: check the Zylia's USB link)
 └── data/              your recordings go here (not in git)
 ```
